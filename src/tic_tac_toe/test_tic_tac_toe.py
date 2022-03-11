@@ -1,12 +1,12 @@
 import sys
 sys.path.append('src/tic_tac_toe')
-from player import *
+from random_player import *
 from game import *
 
 
 num_wins = {1: 0, 2: 0, 'ties': 0}
 for _ in range(200):
-  players = [Player(), Player()]
+  players = [RandomPlayer(), RandomPlayer()]
   game = Game(players, starting_player=(((_+1)%2)+1))
   game.run_to_completion()
   if game.winner != 'Tie':

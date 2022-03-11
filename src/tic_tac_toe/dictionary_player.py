@@ -1,18 +1,20 @@
 import random
 
 class DictPlayer():
-  def __init__(self, index):
-    self.index = index
+  def __init__(self, strategy=None):
+    self.index = None
     self.score = 0
     self.player_number = None
     self.board = None
-    self.strategy = {}
-    self.create_strategy()
+    self.strategy = strategy
+    if self.strategy == None:
+      self.create_strategy()
 
   def set_player_number(self, n):
     self.player_number = n
 
   def create_strategy(self):
+    strategy = {}
     temp_board = []
 
     for i in range(3**9): 
@@ -25,7 +27,8 @@ class DictPlayer():
         temp_board = ''.join(map(str, temp_board))
         open_spaces = self.find_open_indices(temp_board)
         move = random.choices(open_spaces)[0]
-        self.strategy[temp_board] = move
+        strategy[temp_board] = move
+        self.strategy = strategy
   
   def find_open_indices(self, board_string):
     open_indices = []

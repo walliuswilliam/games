@@ -3,16 +3,17 @@ sys.path.append('src/tic_tac_toe')
 from dictionary_player import *
 from game import *
 from itertools import combinations, product
+import matplotlib.pyplot as plt
+import statistics as s
 
 
 def get_scores(players, opponents=None):
   for player in players:
     player.score = 0
   if opponents != None:
-    for player in opponents:
-      player.score = 0
+    for opponent in opponents:
+      opponent.score = 0
     player_combos = product(players, opponents)
-    #print([(p1.index, p2.index) for p1,p2 in player_combos])
   else:
     player_combos = combinations(players, 2)
   for combo in player_combos:
@@ -27,17 +28,10 @@ def get_scores(players, opponents=None):
     if type(game.winner) is int:
       game.players[game.winner-1].score += 1
       game.players[(3-game.winner)-1].score -= 1
-    
-    if opponents != None:
-      print([(player.index, player.score) for player in combo])
-
-  players.sort(reverse=True, key=lambda x: x.score)
-  if opponents != None:
-    opponents.sort(reverse=True, key=lambda x: x.score)
 
 def create_new_generation(parents, num_best=5):
   get_scores(parents)
-  parents = parents[:num_best]
+  parents = sort_by_score(parents)[:num_best]
   parent_combos = combinations(parents, 2)
   children = []
   children_strats = []
@@ -48,6 +42,7 @@ def create_new_generation(parents, num_best=5):
   for strat in children_strats:
     children.append(DictPlayer(strategy=strat))
   get_scores(children)
+  children = sort_by_score(children)
   return children
 
 def mate(parents): #tuple
@@ -62,26 +57,17 @@ def run_genetic_algorithm(num_players, num_generations=1):
   for generation in range(num_generations):
     players = create_new_generation(players)
   
+def sort_by_score(players):
+  players.sort(reverse=True, key=lambda x: x.score)
+  return players
 
-
-players = [DictPlayer() for _ in range(25)]
-generations = {0:players}
-
-for gen_num in range(1, 51):
-  generations[gen_num] = create_new_generation(generations[gen_num-1])
-
-
-better_players = generations[45][:5]
-
-for index, player in enumerate(players):
-  player.index = index
-
-for index, player in enumerate(better_players):
-  player.index = index+len(players)
-
-print('players', [player.index for player in players])
-print('better players', [player.index for player in better_players])
-
-get_scores(players, better_players)
-
-print([player.score for player in better_players])
+def validate_generation(generation): #list of players
+  gen_scores = [p.score for p in generation]
+  if gen_scores[0] < 0 or gen_scores[-1] > 0:
+    raise Exception(f'Invalid Scores: {gen_scores}')
+  
+  for i in range(len(gen_scores)):
+    if i == 0:
+      continue
+    if gen_scores[i] > gen_scores[i-1]:
+      raise Exception(f'Misordered Scores: {gen_scores}')

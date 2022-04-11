@@ -1,4 +1,5 @@
 import random
+random.seed(1)
 
 class DictPlayer():
   def __init__(self, strategy=None):
@@ -29,6 +30,8 @@ class DictPlayer():
         move = random.choices(open_spaces)[0]
         strategy[temp_board] = move
         self.strategy = strategy
+    with open('strat.txt', 'w') as f:
+      f.write('dict = ' + str(strategy) + '\n')  
   
   def find_open_indices(self, board_string):
     open_indices = []
@@ -43,15 +46,34 @@ class DictPlayer():
     return chosen_move
 
   def board_to_string(self, board):
-    board = self.nones_to_zeros(board)
+    board = [[str(i) for i in row] for row in board]
+    if self.player_number == 2:
+      board = self.swap_nums(board)
+
     return ''.join([''.join(row) for row in board])
 
   def string_to_board(self, string):
-    board = [[int(string[i+3*j]) if int(string[i+3*j]) != 0 else None  for i in range(3)] for j in range(3)]
+    board = [[],[],[]]
+    for row_index, row in enumerate(board):
+      for i in range(3):
+        row.append(int(string[(row_index*3)+i]))
+
+    if self.player_number == 2:
+      board = [[int(i) for i in row] for row in self.swap_nums(board)]
+
     return board
 
-  def nones_to_zeros(self, board):
-    return [map(str,(map(lambda x: 0 if x is None else x, row))) for row in board]
+  def swap_nums(self, board):
+    new_board = [[],[],[]]
+    for row_index, row in enumerate(board):
+      for i in row:
+        if i == 1:
+          new_board[row_index].append('2')
+        elif i == 2:
+          new_board[row_index].append('1')
+        else:
+          new_board[row_index].append(str(i))
+    return new_board
 
   def index_to_coords(self, index):
     return (int((index-index%3)/3), int(index%3))

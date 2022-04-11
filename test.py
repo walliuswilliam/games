@@ -10,7 +10,17 @@ from dictionary_player import *
 from game import *
 from genetic_algorithm import *
 
-p = DictPlayer()
+from strat import *
+
+p1, p2 = DictPlayer(strategy=strat_dict), DictPlayer(strategy=strat_dict)
+
+game = Game([p1,p2], starting_player=1)
+game.run_to_completion()
+print(game.winner)
+
+game = Game([p1,p2], starting_player=2)
+game.run_to_completion()
+print(game.winner)
 
 quit()
 

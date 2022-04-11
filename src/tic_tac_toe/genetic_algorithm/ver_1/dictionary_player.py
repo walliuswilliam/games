@@ -30,8 +30,8 @@ class DictPlayer():
         move = random.choices(open_spaces)[0]
         strategy[temp_board] = move
         self.strategy = strategy
-    with open('strat.txt', 'w') as f:
-      f.write('dict = ' + str(strategy) + '\n')  
+    # with open('strat.txt', 'w') as f:
+    #   f.write('dict = ' + str(strategy) + '\n')  
   
   def find_open_indices(self, board_string):
     open_indices = []

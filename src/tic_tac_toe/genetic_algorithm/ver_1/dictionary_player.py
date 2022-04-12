@@ -1,5 +1,4 @@
 import random
-random.seed(1)
 
 class DictPlayer():
   def __init__(self, strategy=None):
@@ -29,9 +28,7 @@ class DictPlayer():
         open_spaces = self.find_open_indices(temp_board)
         move = random.choices(open_spaces)[0]
         strategy[temp_board] = move
-        self.strategy = strategy
-    # with open('strat.txt', 'w') as f:
-    #   f.write('dict = ' + str(strategy) + '\n')  
+        self.strategy = strategy 
   
   def find_open_indices(self, board_string):
     open_indices = []
@@ -60,20 +57,11 @@ class DictPlayer():
 
     if self.player_number == 2:
       board = [[int(i) for i in row] for row in self.swap_nums(board)]
-
     return board
 
   def swap_nums(self, board):
-    new_board = [[],[],[]]
-    for row_index, row in enumerate(board):
-      for i in row:
-        if i == 1:
-          new_board[row_index].append('2')
-        elif i == 2:
-          new_board[row_index].append('1')
-        else:
-          new_board[row_index].append(str(i))
-    return new_board
+    board = [[3-int(i) if int(i) != 0 else int(i) for i in row ] for row in board]
+    return [[str(i) for i in row] for row in board]
 
   def index_to_coords(self, index):
     return (int((index-index%3)/3), int(index%3))

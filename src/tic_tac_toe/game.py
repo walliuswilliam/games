@@ -52,3 +52,11 @@ class Game():
       if self.winner is not None:
         return self.winner
     return self.winner
+  
+  def print_board(self):
+    print("\n-------")
+    for row in self.board:
+      for element in row[:-1]:
+        print(element, end="  ")
+      print(row[-1])
+    print("-------")

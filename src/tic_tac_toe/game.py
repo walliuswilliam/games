@@ -31,7 +31,7 @@ class Game():
     rows = board
     cols = [[board[i][j] for i in range(3)] for j in range(3)]
     diags = [[board[i][i] for i in range(3)],[board[i][2-i] for i in range(3)]]
-    
+   
     for i in (rows + cols + diags):
       if len(set(i)) == 1 and 0 not in i:
         self.winner = i[0]

@@ -1,7 +1,4 @@
-import sys
-import os
-import pkg_resources
-import copy
+import sys, os, pkg_resources
 pkgs = sorted([str(i.key) for i in pkg_resources.working_set])
 if 'matplotlib' not in pkgs: os.system("pip install matplotlib")
 sys.path.append('src/tic_tac_toe')
@@ -27,7 +24,7 @@ plt.plot(generations.keys(), gen_scores)
 plt.title('Avg Score vs First Gen')
 plt.xlabel('Num Generation')
 plt.ylabel('Avg Score')
-plt.savefig('src/tic_tac_toe/genetic_algorithm/ver_1/gen_alg.png')
+plt.savefig('src/tic_tac_toe/genetic_algorithm/ver_1/vs_first_gen.png')
 
 plt.clf()
 
@@ -49,4 +46,4 @@ plt.plot(generations.keys(), gen_scores)
 plt.title('Avg Score vs Prev Gen')
 plt.xlabel('Num Generation')
 plt.ylabel('Avg Score')
-plt.savefig('src/tic_tac_toe/genetic_algorithm/ver_1/gen_alg_prev.png')
+plt.savefig('src/tic_tac_toe/genetic_algorithm/ver_1/vs_prev_gen.png')

@@ -1,10 +1,8 @@
-import sys
+import sys, statistics as s, matplotlib.pyplot as plt
 sys.path.append('src/tic_tac_toe')
 from dictionary_player import *
 from game import *
 from itertools import combinations, product
-import matplotlib.pyplot as plt
-import statistics as s
 
 
 def get_scores(players, fitness_method, opponents=None):
@@ -31,6 +29,7 @@ def get_scores(players, fitness_method, opponents=None):
       if type(game.winner) is int:
         game.players[game.winner-1].score += 1
         game.players[(3-game.winner)-1].score -= 1
+
   elif fitness_method == 'bracket':
     if opponents != None:
       player_matchups = list(zip(players,opponents))
@@ -51,7 +50,6 @@ def get_scores(players, fitness_method, opponents=None):
           winner.score += 1
       player_matchups = [(next_bracket[i],next_bracket[i+1]) for i in range(0,len(next_bracket)-1,2)]
 
-
   else:
     raise Exception('Invalid Fitness Method')
 
@@ -61,6 +59,39 @@ def create_new_generation(prev_gen, selection_method, fitness_method, population
   if selection_method == 'hard cutoff':
     get_scores(prev_gen, fitness_method)
     parents = sort_by_score(prev_gen)[:population_size//4]
+    
+    # best = parents[0]
+    # win=0
+    # lose = 0
+    # for p in prev_gen:
+    #   best_score = 0
+    #   p_score = 0
+
+    #   game = Game([best, p], starting_player=1)
+    #   game.run_to_completion()
+
+    #   if game.winner == 1:
+    #     best_score += 1
+    #   if game.winner == 2:
+    #     p_score += 1
+      
+    #   game = Game([best, p], starting_player=2)
+    #   game.run_to_completion()
+
+    #   if game.winner == 1:
+    #     best_score += 1
+    #   if game.winner == 2:
+    #     p_score += 1
+      
+    #   if best_score > p_score:
+    #     win += 1
+    #   elif p_score > best_score:
+    #     lose += 1
+
+    
+    # print(f'won {win}/{len(prev_gen)} games')
+    # print(f'lost {lose}/{len(prev_gen)} games\n')
+
 
   elif selection_method == 'stochastic':
     get_scores(prev_gen, fitness_method)
@@ -81,7 +112,6 @@ def create_new_generation(prev_gen, selection_method, fitness_method, population
 
   else:
     raise Exception('Invalid Selection Method')
-
 
   for _ in range(population_size):
     children.append(mate(parents, mutation_rate))

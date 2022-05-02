@@ -55,11 +55,11 @@ def vs_prev_gen(initial_players, selection_method, fitness_method, population_si
         plt.clf()
 
 def vs_first_and_prev_gen(initial_players, selection_method, fitness_method, population_size, plot=False):
-    get_scores(initial_players, fitness_method)
+    get_scores(initial_players, 'round_robin')
     generations_first = {0:initial_players}
     generations_prev = {0:initial_players}
 
-    get_scores(initial_players, fitness_method, opponents=generations_first[0][:5])
+    get_scores(initial_players, 'round_robin', opponents=generations_first[0][:5])
     gen_scores_first = [s.mean([p.score for p in generations_first[0][:5]])]
     gen_scores_prev = [s.mean([p.score for p in generations_prev[0][:5]])]
 
@@ -67,13 +67,13 @@ def vs_first_and_prev_gen(initial_players, selection_method, fitness_method, pop
         print(gen_num)
         generations_first[gen_num] = create_new_generation(generations_first[gen_num-1], selection_method, fitness_method, population_size)
         top_players = generations_first[gen_num][:5]
-        get_scores(generations_first[gen_num-1], fitness_method, opponents=top_players)
+        get_scores(initial_players, 'round_robin', opponents=top_players)
         gen_scores_first.append(s.mean([p.score for p in top_players]))
 
 
         generations_prev[gen_num] = create_new_generation(generations_prev[gen_num-1], selection_method, fitness_method, population_size)
         top_players = generations_prev[gen_num][:5]
-        get_scores(initial_players, fitness_method, opponents=top_players)
+        get_scores(generations_prev[gen_num-1], 'round_robin', opponents=top_players)
         gen_scores_prev.append(s.mean([p.score for p in top_players]))
         
     plt.figure(1)
@@ -97,9 +97,12 @@ def vs_first_and_prev_gen(initial_players, selection_method, fitness_method, pop
         plt.savefig(f'src/tic_tac_toe/genetic_algorithm/ver_2/plots/{fitness_method}_vs_prev_gen.png')
 
 
-first_gen_players = [DictPlayer() for _ in range(64)]
+first_gen_players = [DictPlayer() for _ in range(32)]
 
+# for _ in range(10):
+#     create_new_generation(first_gen_players, 'hard cutoff', 'bracket', 32)
 
+# quit()
 selection_methods = ['hard cutoff', 'stochastic', 'tournament']
 
 for method in selection_methods:

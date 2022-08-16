@@ -4,21 +4,19 @@ class Game():
     self.set_player_numbers()
     self.starting_player = starting_player
 
-    self.board = '000000000'
+    self.board = [[0,0,0],
+                  [0,0,0],
+                  [0,0,0]]
     self.winner = None
     
   
   def set_player_numbers(self):
     for i, player in enumerate(self.players):
       player.set_player_number(i+1)
-
-  def update_board(self, index, value):
-    board = [i for i in self.board]
-    board[index] = str(value)
-    self.board = ''.join(board)
   
   def find_open_spaces(self, board):
-    return [i for i in range(len(board)) if board[i] == '0']
+    spaces = [(i,j) for i in range(3) for j in range(3) if board[i][j] == 0]
+    return spaces
 
   def complete_turn(self, player_number):
     player = self.players[player_number-1]
@@ -26,22 +24,21 @@ class Game():
     chosen_move = player.choose_space(open_spaces, self.board)
     if chosen_move not in open_spaces:
       raise Exception('Invalid Move Chosen')
-    self.update_board(chosen_move, player_number)
+    self.board[chosen_move[0]][chosen_move[1]] = player_number
   
   def check_winner(self):
-    board = self.board
-    rows = [[board[i+3*j] for i in range(3)] for j in range(3)]
-    cols = [[board[j+3*i] for i in range(3)] for j in range(3)]
-    diags = [[board[i+3*i] for i in range(3)],[board[i+3*(2-i)] for i in range(3)]]
-
+    board = self.board.copy()
+    rows = board
+    cols = [[board[i][j] for i in range(3)] for j in range(3)]
+    diags = [[board[i][i] for i in range(3)],[board[i][2-i] for i in range(3)]]
+   
     for i in (rows + cols + diags):
-      if len(set(i)) == 1 and '0' not in i:
-        self.winner = int(i[0])
+      if len(set(i)) == 1 and 0 not in i:
+        self.winner = i[0]
 
     if self.winner == None:
-      if not any('0' in row for row in self.board):
+      if not any(0 in row for row in self.board):
         self.winner = 'Tie'
-    self.print_board()
 
   def run_to_completion(self):
     while self.winner is None:
@@ -58,8 +55,7 @@ class Game():
   
   def print_board(self):
     print("\n-------")
-    board = [[self.board[i+3*j] for i in range(3)] for j in range(3)]
-    for row in board:
+    for row in self.board:
       for element in row[:-1]:
         print(element, end="  ")
       print(row[-1])

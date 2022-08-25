@@ -1,8 +1,7 @@
 class Game():
-  def __init__(self, players, starting_player=1):
+  def __init__(self, players):
     self.players = players
     self.set_player_numbers()
-    self.starting_player = starting_player
 
     self.board = '000000000'
     self.winner = None
@@ -10,7 +9,7 @@ class Game():
   
   def set_player_numbers(self):
     for i, player in enumerate(self.players):
-      player.set_player_number(i+1)
+      player.set_player_num(i+1)
 
   def update_board(self, index, value):
     board = [i for i in self.board]
@@ -41,16 +40,15 @@ class Game():
     if self.winner == None:
       if not any('0' in row for row in self.board):
         self.winner = 'Tie'
-    self.print_board()
 
   def run_to_completion(self):
     while self.winner is None:
-      self.complete_turn(self.starting_player)
+      self.complete_turn(1)
       self.check_winner()
       if self.winner is not None:
         return self.winner
 
-      self.complete_turn(3-self.starting_player)
+      self.complete_turn(2)
       self.check_winner()
       if self.winner is not None:
         return self.winner

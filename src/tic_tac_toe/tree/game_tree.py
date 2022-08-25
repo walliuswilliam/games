@@ -1,154 +1,100 @@
-import copy
-
 class Node():
-  def __init__(self, state, player):
-    self.state = state
-    self.player = player
-    self.winner = None
-    self.children = None
-  
-  def check_for_winner(self):
-    rows = self.state.copy()
-    cols = [[self.state[i][j] for i in range(3)] for j in range(3)]
-    diags = [[self.state[i][i] for i in range(3)],
-             [self.state[i][2-i] for i in range(3)]]
-
-    board_full = True
-    for row in rows + cols + diags:
-      if None in row:
-        board_full = False
-
-      for player in [1,2]:
-        if row == [player for _ in range(3)]:
-          return player
+    def __init__(self, state, player):
+        self.state = state
+        self.turn = 1 if self.state.count('1') == self.state.count('2') else 2
+        self.player = player
+        self.winner = self.check_winner()
+        self.children = []
+        self.parent = None
+        self.score = None
     
-    if board_full:
-      return 'Tie'
-    return None
 
+    def set_score(self):
+        if len(self.children) == 0:
+            if self.winner == self.player:
+                self.score = 1
+            elif self.winner == 3 - self.player:
+                self.score = -1
+            elif self.winner == 'Tie':
+                self.score = 0
+            return
 
+        #print([child.state for child in self.children])
+        if self.turn == self.player:
+            self.score = max(self.get_children_scores())
+        elif self.turn == 3 - self.player:
+            self.score = min(self.get_children_scores())
 
-  
-#   def find_open_indices(self, board_string):
-#     open_indices = []
-#     for index, value in enumerate(board_string):
-#       if value == '0':
-#         open_indices.append(index)
-#     return open_indices
-    
-#   def choose_space(self, possible_moves, board):
-#     string_board = self.board_to_string(board)
-#     chosen_move = self.index_to_coords(self.strategy[string_board])
-#     return chosen_move
+    def get_children_scores(self):
+        if len(self.children) == 0:
+            return
+        for child in self.children:
+            child.set_score()
+        return [child.score for child in self.children]
 
-#   def board_to_string(self, board):
-#     board = [[str(i) for i in row] for row in board]
-#     if self.player_number == 2:
-#       board = self.swap_nums(board)
+    def check_winner(self):
+        state = self.state
+        rows = [[state[i+3*j] for i in range(3)] for j in range(3)]
+        cols = [[state[j+3*i] for i in range(3)] for j in range(3)]
+        diags = [[state[i+3*i] for i in range(3)],[state[i+3*(2-i)] for i in range(3)]]
 
-#     return ''.join([''.join(row) for row in board])
+        for i in (rows + cols + diags):
+            if len(set(i)) == 1 and '0' not in i:
+                return int(i[0])
 
-#   def string_to_board(self, string):
-#     board = [[],[],[]]
-#     for row_index, row in enumerate(board):
-#       for i in range(3):
-#         row.append(int(string[(row_index*3)+i]))
-
-#     if self.player_number == 2:
-#       board = [[int(i) for i in row] for row in self.swap_nums(board)]
-#     return board
-
-#   def swap_nums(self, board):
-#     board = [[3-int(i) if int(i) != 0 else int(i) for i in row ] for row in board]
-#     return [[str(i) for i in row] for row in board]
-
-#   def index_to_coords(self, index):
-#     return (int((index-index%3)/3), int(index%3))
-
-#   def coords_to_index(self, coords):
-#     return 3*coords[0]+coords[1]
-  
+        if not any('0' in row for row in state):
+            return 'Tie'
 
 
 class GameTree():
-    def __init__(self, starting_player):
-        self.root = Node([[None for _ in range(3)] for _ in range(3)], starting_player)
-        # self.states = self.create_state_dict()
-        # print(len(self.states))
-        # for state in self.states.keys():
-        #     print(self.print_states(state))
-        self.leaf_nodes = 0
+    def __init__(self, player):
+        self.root = Node('000000000', player)
+        self.player = player
+        self.nodes = [self.root]
+        self.leaf_nodes = []
+        self.states = {self.root.state:self.root}
 
 
-    def string_to_board(self, string):
-        board = [[],[],[]]
-        for row_index, row in enumerate(board):
-            for i in range(3):
-                row.append(int(string[(row_index*3)+i]))
-        return board
+    def construct_tree(self):
+        queue = [self.root]
+        while len(queue) != 0:
+            current_node = queue[0]
+            if current_node.winner is None:
+                moves = self.find_open_spaces(current_node.state)
+                for move in moves:
+                    state = current_node.state
+                    new_state = self.update_board(state, move, current_node.turn)
+                    if new_state in self.states:
+                        new_node = self.states[new_state]
+                    else:
+                        new_node = Node(new_state, self.player)
+                        self.nodes.append(new_node)
+                        self.states[new_state] = new_node
+                        queue.append(new_node)
+                        
+                    current_node.children.append(new_node)
+                    new_node.parent = current_node
+            else:
+                self.leaf_nodes.append(current_node)
+            queue.remove(current_node)
 
+    def set_node_scores(self):
+        assert len(self.root.children) != 0, "create game tree before setting scores"
+        self.root.set_score()
+    
+    def find_open_spaces(self, board):
+        return [i for i in range(len(board)) if board[i] == '0']
+
+    def update_board(self, board, index, value):
+        board = [i for i in board]
+        board[index] = str(value)
+        return ''.join(board)
 
     def print_states(self, state):
-        state = self.string_to_board(state)
         print("\n-------")
-        for row in state:
+        board = [[self.board[i+3*j] for i in range(3)] for j in range(3)]
+        for row in board:
             for element in row[:-1]:
                 print(element, end="  ")
             print(row[-1])
         print("-------")
-
-    def create_state_dict(self):
-        strategy = {}
-        temp_board = []
-
-        for i in range(3**9): 
-            c = i
-            temp_board = []
-            for _ in range(9): 
-                temp_board.append(c % 3)
-                c = c // 3
-            if abs(temp_board.count(1)-temp_board.count(2)) <= 1 and 0 in temp_board:
-                temp_board = ''.join(map(str, temp_board))
-                strategy[temp_board] = Node(temp_board)
-        return strategy
-
-
-    def contruct_tree(self):
-        self.set_children(self.root)
-        current_layer = self.root.children
-        while len(current_layer) != 0:
-            next_layer = self.get_next_layer(current_layer)
-            current_layer = next_layer
-
-    def get_next_layer(self, layer):
-        new_layer = []
-        for child in layer:
-            winner = child.check_for_winner()
-        if winner is None:
-            self.set_children(child)
-            for sub_child in child.children:
-                new_layer.append(sub_child)
-        else:
-            child.winner = winner
-            self.leaf_nodes += 1
-
-        return new_layer
-
-    def set_children(self, parent):
-        children = []
-        for row_index in range(len(parent.state)):
-            for column_index in range(len(parent.state[row_index])):
-                if parent.state[row_index][column_index] is None:
-                    child = copy.deepcopy(parent.state)
-                    child[row_index][column_index] = self.opposite_player(parent.player)
-                    children.append(Node(child, self.opposite_player(parent.player)))
-        parent.children = children
-
-
-    def opposite_player(self, player):
-        if player == None:
-            return None
-        elif player == 1:
-            return 2
-        elif player == 2:
-            return 1

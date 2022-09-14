@@ -53,9 +53,9 @@ class ConnectFour:
 
     def four_in_list(self, lst):
         for string in lst:
-            for i in range(4, len(string)):
-                if len(set(string[i-4:i])) == 1 and string[i-4] != '0':
-                    return string[i-4]
+            for i in range(0, len(string)-3):
+                if string[i] == string[i+1] == string[i+2] == string[i+3] != '0':
+                    return string[i]
         return False
 
     def run(self):

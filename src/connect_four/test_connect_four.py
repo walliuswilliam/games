@@ -4,8 +4,8 @@ from players import *
 from connect_four import *
 
 
-players = [RandomPlayer(), RandomPlayer()]
+players = [InputPlayer(), RandomPlayer()]
 game = ConnectFour(players)
 
 game.run()
-print(game.winner)
+print(f'Winner: Player {game.winner}')

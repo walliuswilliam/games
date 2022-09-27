@@ -17,9 +17,21 @@ class Node():
                 self.score = -1
             elif self.winner == 'Tie':
                 self.score = 0
+            else:
+                rows = [[self.state[i+3*j] for i in range(3)] for j in range(3)]
+                cols = [[self.state[j+3*i] for i in range(3)] for j in range(3)]
+                diags = [[self.state[i+3*i] for i in range(3)],[self.state[i+3*(2-i)] for i in range(3)]]
+                sliced_board_list = rows + cols + diags
+                
+                counter = 0
+                for lst in sliced_board_list:
+                    if lst.count(str(self.player)) == 2 and lst.count('0') == 1:
+                        counter += 1
+                    elif lst.count(str(3-self.player)) == 2 and lst.count('0') == 1:
+                        counter -= 1
+                self.score = counter/8
             return
 
-        #print([child.state for child in self.children])
         if self.turn == self.player:
             self.score = max(self.get_children_scores())
         elif self.turn == 3 - self.player:
@@ -55,11 +67,20 @@ class HeuristicTree():
         self.states = {self.root.state:self.root}
 
 
-    def construct_tree(self, starting_node, n):
+    def construct_tree(self, starting_node_state, n):
+        try:
+            starting_node = self.states[starting_node_state]
+        except:
+            starting_node = Node(starting_node_state, self.player)
+            self.nodes.append(starting_node)
+            self.states[starting_node_state] = starting_node
+        
+        self.root = starting_node
+        ending_depth = self.calc_game_depth(starting_node.state) + n
         queue = [starting_node]
         while len(queue) != 0:
             current_node = queue[0]
-            if self.calc_game_depth(current_node.state) > n:
+            if self.calc_game_depth(current_node.state) >= ending_depth:
                 queue.remove(current_node)
                 continue
             if current_node.winner is None:

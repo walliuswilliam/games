@@ -3,7 +3,7 @@ class ConnectFour:
         self.players = players
         self.board = ['0000000' for _ in range(6)]
         for i, player in enumerate(self.players):
-            player.player_num = i+1
+            player.set_player_num(i+1)
         self.winner = None
 
     
@@ -27,12 +27,12 @@ class ConnectFour:
         #rows
         rows = self.four_in_list(self.board)
         if rows:
-            self.winner = rows
+            self.winner = int(rows)
 
         #columns
         cols = self.four_in_list(self.get_cols())
         if cols:
-            self.winner = cols
+            self.winner = int(cols)
 
         #diagonals
         fdiag = ['' for _ in range(len(self.board) + len(self.board[0]) - 1)]
@@ -45,7 +45,7 @@ class ConnectFour:
 
         diag = self.four_in_list(fdiag + bdiag)
         if diag:
-            self.winner = diag
+            self.winner = int(diag)
         
         if self.winner is None:
             if not any('0' in row for row in self.board):

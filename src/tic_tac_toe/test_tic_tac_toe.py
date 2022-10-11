@@ -4,9 +4,9 @@ from players import *
 from game import *
 
 
-num_games = 50
+num_games = 20
 num_wins = {1: 0, 2: 0, 'ties': 0}
-players = [HeuristicPlayer(9), MinimaxPlayer()]
+players = [HeuristicPlayer(2), MinimaxPlayer()]
 # players = [HeuristicPlayer(1), HeuristicPlayer(9)]
 # players = [MinimaxPlayer(), RandomPlayer()]
 

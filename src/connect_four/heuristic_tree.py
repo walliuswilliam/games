@@ -22,39 +22,29 @@ class Node():
 
     def set_score(self):
         state = self.string_to_list(self.state)
-        if len(self.children) == 0:
-            # state = ['000000', '000001', '000001', '220111', '001110', '112220', '222010']
-            row = self.three_in_list(state)
-            col = self.three_in_list([''.join(i) for i in zip(*state)])
-            diags = self.three_in_list(self.get_diags(state))
-
-            total_threes = {i: row.get(i, 0) + col.get(i, 0) + diags.get(i, 0) for i in set(row).union(col).union(diags)}
-            score = (total_threes[self.player]-total_threes[3-self.player])/15
-
-            quit()
-
-
-
-
+        if len(self.children) == 0:  
             if self.winner == self.player:
-                self.score = 1
+                self.score = 99999999
             elif self.winner == 3 - self.player:
-                self.score = -1
+                self.score = -99999999
             elif self.winner == 'tie':
                 self.score = 0
-            else:
-                rows = [[self.state[i+3*j] for i in range(3)] for j in range(3)]
-                cols = [[self.state[j+3*i] for i in range(3)] for j in range(3)]
-                diags = [[self.state[i+3*i] for i in range(3)],[self.state[i+3*(2-i)] for i in range(3)]]
-                sliced_board_list = rows + cols + diags
+            else:         
+                row = self.three_in_list(state)
+                col = self.three_in_list([''.join(i) for i in zip(*state)])
+                diags = self.three_in_list(self.get_diags(state))
+
+                total_threes = {i: row.get(i, 0) + col.get(i, 0) + diags.get(i, 0) for i in set(row).union(col).union(diags)}
+                three_score = total_threes[self.player]-total_threes[3-self.player]
                 
-                counter = 0
-                for lst in sliced_board_list:
-                    if lst.count(str(self.player)) == 2 and lst.count('0') == 1:
-                        counter += 1
-                    elif lst.count(str(3-self.player)) == 2 and lst.count('0') == 1:
-                        counter -= 1
-                self.score = counter/8
+                row = self.two_in_list(state)
+                col = self.two_in_list([''.join(i) for i in zip(*state)])
+                diags = self.two_in_list(self.get_diags(state))
+
+                total_twos = {i: row.get(i, 0) + col.get(i, 0) + diags.get(i, 0) for i in set(row).union(col).union(diags)}
+                two_score = total_twos[self.player]-total_twos[3-self.player]
+                
+                self.score = 200*three_score+40*two_score
             return
 
         if self.turn == self.player:
@@ -105,31 +95,25 @@ class Node():
     def three_in_list(self, lst):
         totals = {1:0, 2:0}
         for string in lst:
-            three = False
             for i in range(0, len(string)-3):
-                if three:
-                    continue
-                if string[i] == '0' and string[i+1] == string[i+2] == string[i+3] != '0':
-                    totals[int(string[i+1])] += 1
-                    three = True
-                if string[i] == string[i+1] == string[i+2] != '0' and string[i+3] == '0':
-                    totals[int(string[i+1])] += 1
-                    three = True
+                temp_str = string[i:i+4]
+                str_set = set(temp_str)
+
+                if temp_str.count('0') == 1 and len(str_set) == 2:
+                    str_set.remove('0')
+                    totals[int(list(str_set)[0])] += 1
         return totals
 
     def two_in_list(self, lst):
         totals = {1:0, 2:0}
         for string in lst:
-            two = False
             for i in range(0, len(string)-3):
-                if two:
-                    continue
-                if string[i] == string[i+1] == '0' and string[i+2] == string[i+3] != '0':
-                    totals[int(string[i+1])] += 1
-                    two = True
-                if string[i] == string[i+1] != '0' and string[i+2] == string[i+3] == '0':
-                    totals[int(string[i+1])] += 1
-                    two = True
+                temp_str = string[i:i+4]
+                str_set = set(temp_str)
+
+                if temp_str.count('0') == 2 and len(str_set) == 2:
+                    str_set.remove('0')
+                    totals[int(list(str_set)[0])] += 1
         return totals
     
     def list_to_string(self, lst):
@@ -228,4 +212,3 @@ class HeuristicTree():
 
     def string_to_list(self, s):
         return [s[i:i+7] for i in range(0, len(s), 7)]
-

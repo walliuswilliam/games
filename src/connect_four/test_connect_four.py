@@ -3,22 +3,18 @@ sys.path.append('src/connect_four')
 from players import *
 from connect_four import *
 
-# players = [InputPlayer(), InputPlayer()]
+
+num_games = 100
+num_wins = {1: 0, 2: 0, 'ties': 0}
+players = [HeuristicPlayer(3), SmartRandomPlayer()]
+
 # game = ConnectFour(players)
 # game.run()
-
-num_games = 50
-num_wins = {1: 0, 2: 0, 'ties': 0}
-players = [HeuristicPlayer(2), RandomPlayer()]
-# players = [InputPlayer(), RandomPlayer()]
-
-game = ConnectFour(players)
-game.run()
-print(game.winner)
-quit()
+# print(game.winner)
+# quit()
 
 for i in range(num_games//2):
-    print(i)
+    # print(i)
     game = ConnectFour(players)
     game.run()
     if game.winner != 'tie':
@@ -27,7 +23,7 @@ for i in range(num_games//2):
         num_wins['ties'] += 1
 players.reverse()
 for i in range(num_games//2):
-    print(i+num_games//2)
+    # print(i+num_games//2)
     game = ConnectFour(players)
     game.run()
     if game.winner != 'tie':

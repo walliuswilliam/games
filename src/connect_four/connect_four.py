@@ -8,9 +8,10 @@ class ConnectFour:
 
     
     def move(self, player):
-        chosen_move = player.move(self.board)
+        chosen_move = player.move(self.board.copy())
         cols = self.get_cols()
         chosen_col = [*cols[chosen_move]]
+
         try:
             col_idx = len(chosen_col)-1 - list(reversed(chosen_col)).index('0')
             row = self.board[col_idx]
@@ -57,6 +58,10 @@ class ConnectFour:
                 if string[i] == string[i+1] == string[i+2] == string[i+3] != '0':
                     return string[i]
         return False
+    
+    def print_board(self):
+        for line in self.board:
+            print(' '.join(line))
 
     def run(self):
         while self.winner is None:

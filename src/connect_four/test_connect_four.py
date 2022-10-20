@@ -1,17 +1,21 @@
 import sys
 sys.path.append('src/connect_four')
-from players import *
+sys.path.append('src/connect_four/players')
 from connect_four import *
+from heuristic_player import *
+from input_player import *
+from random_player import *
+from smart_random_player import *
 
 
-num_games = 100
+num_games = 10
 num_wins = {1: 0, 2: 0, 'ties': 0}
 players = [HeuristicPlayer(3), SmartRandomPlayer()]
 
-# game = ConnectFour(players)
-# game.run()
-# print(game.winner)
-# quit()
+game = ConnectFour(players)
+game.run(print_game=True)
+print(game.winner)
+quit()
 
 for i in range(num_games//2):
     # print(i)

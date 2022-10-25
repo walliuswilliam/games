@@ -4,7 +4,7 @@ class InputPlayer:
         self.invalid_moves = 0
   
 
-    def set_player_num(self, n):
+    def set_player_number(self, n):
         self.player_num = n
 
     def choose_move(self, board, possible_moves):

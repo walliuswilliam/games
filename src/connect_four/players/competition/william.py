@@ -2,15 +2,15 @@ import sys
 from copy import deepcopy
 
 
-class CompPlayer:
+class William:
     def __init__(self, ply_num=5):
-        self.player_num = None
+        self.number = None
         self.ply_num = ply_num
 
 
-    def set_player_num(self, n):
-        self.player_num = n
-        self.tree = HeuristicTree(self.player_num)
+    def set_player_number(self, n):
+        self.number = n
+        self.tree = HeuristicTree(self.number)
         self.tree.construct_tree(self.tree.root.state, self.ply_num)
         self.tree.set_node_scores()
 
@@ -20,7 +20,7 @@ class CompPlayer:
         chosen_col = [*cols[move]]
 
         col_idx = len(chosen_col)-1 - list(reversed(chosen_col)).index(0)
-        board[col_idx][move] = self.player_num
+        board[col_idx][move] = self.number
         return board
 
     def get_cols(self, board):

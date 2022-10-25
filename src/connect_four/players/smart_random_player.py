@@ -3,12 +3,12 @@ import random
 
 class SmartRandomPlayer:
     def __init__(self):
-        self.player_num = None
+        self.number = None
         self.invalid_moves = 0
   
 
-    def set_player_num(self, n):
-        self.player_num = n
+    def set_player_number(self, n):
+        self.number = n
 
     def choose_move(self, board, possible_moves):
         player_win = False

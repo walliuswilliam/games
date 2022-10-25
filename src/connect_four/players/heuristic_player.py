@@ -5,12 +5,12 @@ from heuristic_tree import *
 
 class HeuristicPlayer:
     def __init__(self, ply_num):
-        self.player_num = None
+        self.number = None
         self.ply_num = ply_num
 
 
-    def set_player_num(self, n):
-        self.player_num = n
+    def set_player_number(self, n):
+        self.number = n
         self.tree = HeuristicTree(self.player_num)
         self.tree.construct_tree(self.tree.root.state, self.ply_num)
         self.tree.set_node_scores()

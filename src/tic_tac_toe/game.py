@@ -41,7 +41,7 @@ class Game():
 			if not any('0' in row for row in self.board):
 				self.winner = 'Tie'
 
-	def run_to_completion(self):
+	def run(self):
 		while self.winner is None:
 			self.complete_turn(1)
 			self.check_winner()

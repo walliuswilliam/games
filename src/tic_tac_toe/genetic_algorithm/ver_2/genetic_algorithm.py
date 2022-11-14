@@ -19,13 +19,13 @@ def get_scores(players, fitness_method, opponents=None):
       player_matchups = combinations(players, 2)
     for combo in player_matchups:
       game = Game(combo, starting_player=1)
-      game.run_to_completion()
+      game.run()
       if type(game.winner) is int:
         game.players[game.winner-1].score += 1
         game.players[(3-game.winner)-1].score -= 1
 
       game = Game(combo, starting_player=2)
-      game.run_to_completion()
+      game.run()
       if type(game.winner) is int:
         game.players[game.winner-1].score += 1
         game.players[(3-game.winner)-1].score -= 1
@@ -40,7 +40,7 @@ def get_scores(players, fitness_method, opponents=None):
       next_bracket = []
       for combo in player_matchups:
         game = Game(combo, starting_player=random.randint(1,2))
-        game.run_to_completion()
+        game.run()
         if type(game.winner) is int:
           next_bracket.append(combo[game.winner-1])
           combo[game.winner-1].score += 1
@@ -68,7 +68,7 @@ def create_new_generation(prev_gen, selection_method, fitness_method, population
     #   p_score = 0
 
     #   game = Game([best, p], starting_player=1)
-    #   game.run_to_completion()
+    #   game.run()
 
     #   if game.winner == 1:
     #     best_score += 1
@@ -76,7 +76,7 @@ def create_new_generation(prev_gen, selection_method, fitness_method, population
     #     p_score += 1
       
     #   game = Game([best, p], starting_player=2)
-    #   game.run_to_completion()
+    #   game.run()
 
     #   if game.winner == 1:
     #     best_score += 1

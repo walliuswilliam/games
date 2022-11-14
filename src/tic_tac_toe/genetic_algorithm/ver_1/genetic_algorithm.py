@@ -18,13 +18,13 @@ def get_scores(players, opponents=None):
     player_combos = combinations(players, 2)
   for combo in player_combos:
     game = Game(combo, starting_player=1)
-    game.run_to_completion()
+    game.run()
     if type(game.winner) is int:
       game.players[game.winner-1].score += 1
       game.players[(3-game.winner)-1].score -= 1
 
     game = Game(combo, starting_player=2)
-    game.run_to_completion()
+    game.run()
     if type(game.winner) is int:
       game.players[game.winner-1].score += 1
       game.players[(3-game.winner)-1].score -= 1

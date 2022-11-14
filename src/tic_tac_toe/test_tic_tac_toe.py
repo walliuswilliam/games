@@ -1,6 +1,9 @@
 import sys
 sys.path.append('src/tic_tac_toe')
-from players import *
+sys.path.append('src/tic_tac_toe/players')
+from heuristic_player import *
+from random_player import *
+from minimax_player import *
 from game import *
 
 
@@ -13,7 +16,7 @@ players = [HeuristicPlayer(2), MinimaxPlayer()]
 for i in range(num_games//2):
     print(i)
     game = Game(players)
-    game.run_to_completion()
+    game.run()
     if game.winner != 'Tie':
         num_wins[game.winner] += 1
     else:
@@ -22,7 +25,7 @@ players.reverse()
 for i in range(num_games//2):
     print(i+num_games//2)
     game = Game(players)
-    game.run_to_completion()
+    game.run()
     if game.winner != 'Tie':
         num_wins[3-game.winner] += 1
     else:

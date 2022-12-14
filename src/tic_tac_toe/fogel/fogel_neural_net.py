@@ -1,4 +1,9 @@
-import math, random
+import math, random, sys, numpy as np
+sys.path.append('src/tic_tac_toe')
+sys.path.append('src/tic_tac_toe/players')
+from game import *
+from random_player import *
+from neural_net_player import *
 
 class Neuron:
     def __init__(self, idx, actv_func, bias=False):
@@ -25,6 +30,7 @@ class NeuralNet:
         num_neurons = 20+self.h
         self.neurons = [Neuron(i, lambda x: 1/(1+math.e**(-x))) for i in range(1,num_neurons+1)]
         self.set_node_relations()
+        self.score = None
 
         # self.alpha = alpha #mutation rate
 
@@ -133,23 +139,46 @@ class NeuralNet:
         return links
 
 
-def create_initial_generation(node_layer_sizes, data, actv_func):
-  return [NeuralNet.create_random_nn(node_layer_sizes, data, actv_func) for _ in range(30)]
+def create_initial_generation():
+    gen = [NeuralNet.create_net() for _ in range(50)]
+    for net in gen:
+        score_net(net)
+    return gen
 
 def create_new_generation(gen):
-  sorted_rss = sorted(gen, key=lambda x: x.rss())[:15]
-  new_gen = sorted_rss.copy()
+    sorted_nets = sorted(gen, key=lambda x: x.score)[:25]
+    new_gen = sorted_nets.copy()
 
-  for parent in sorted_rss:
-    child_weights = {}
-    for pair, weight in parent.weights.items():
-      child_weights[pair] = weight+parent.alpha*np.random.normal()
-    child_mut_rate = parent.alpha*(math.exp(np.random.normal()/(2**(1/2)*(len(parent.weights))**(1/4))))
-    child = NeuralNet(child_weights, parent.data, parent.actv_func, len(parent.neurons), parent.biases, alpha=child_mut_rate, neurons=parent.neurons)
-    new_gen.append(child)
-  
-  return new_gen
+    for parent in sorted_nets:
+        child_weights = {}
+        for pair, weight in parent.weights.items():
+            child_weights[pair] = weight+np.random.normal(0, 0.05)
+        child_h = parent.h
+        # if bool(random.getrandbits(1)):
+        #     if bool(random.getrandbits(1)):
+        #         if child_h != 1:
+        #             child_h -= 1
+        #     else:
+        #         if child_h != 10:
+        #             child_h += 1
+        
+        child = NeuralNet(child_weights, child_h)
+        new_gen.append(child)
+    for net in new_gen:
+        score_net(net)
+    return new_gen
 
-def get_avg_rss(gen):
-    rss = [net.rss() for net in gen]
-    return sum(rss)/len(rss)
+def score_net(net, num_games=32):
+    score = 0
+    for i in range(num_games):
+        game = Game([NeuralNetPlayer(net), RandomPlayer()])
+        game.run()
+        if game.winner == 1:
+            score +=1
+        elif game.winner == 2:
+            score -= 0
+    net.score = score
+
+def best_net_score(gen):
+    sorted_nets = sorted(gen, key=lambda x: x.score)
+    return sorted_nets[0].score

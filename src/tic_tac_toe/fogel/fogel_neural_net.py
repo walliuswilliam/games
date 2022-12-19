@@ -1,9 +1,12 @@
-import math, random, sys, numpy as np
+import math, random, sys, numpy as np, copy
 sys.path.append('src/tic_tac_toe')
 sys.path.append('src/tic_tac_toe/players')
 from game import *
 from random_player import *
 from neural_net_player import *
+from near_perfect_player import *
+from logger import *
+
 
 class Neuron:
     def __init__(self, idx, actv_func, bias=False):
@@ -22,52 +25,56 @@ class Neuron:
             self.output = self.actv_func(self.input)
 
 class NeuralNet:
-    def __init__(self, weights, h):
+    def __init__(self, neurons, weights, h):
+        self.neurons = neurons # {1:[node_obj, ...], 2:[], 3:[]}
         self.weights = weights
         self.h = h
         self.biases = [10, 11+self.h]
         
-        num_neurons = 20+self.h
-        self.neurons = [Neuron(i, lambda x: 1/(1+math.e**(-x))) for i in range(1,num_neurons+1)]
         self.set_node_relations()
         self.score = None
 
-        # self.alpha = alpha #mutation rate
-
     
     def get_neuron(self, neuron_index):
-        return self.neurons[neuron_index-1]
+        for layer in self.neurons.values():
+            for neuron in layer:
+                if neuron.index == neuron_index:
+                    return neuron
 
     def clear_net(self):
-        for neuron in self.neurons:
-            if not neuron.bias:
-                neuron.input = None
-                neuron.output = None
+        for layer in self.neurons.values():
+            for neuron in layer:
+                if not neuron.bias:
+                    neuron.input = None
+                    neuron.output = None
 
     def set_node_relations(self):
+        for layer in self.neurons.values():
+            for neuron in layer:
+                neuron.parents = []
+                neuron.children = []
         for neurons in self.weights.keys():
             neuron_0 = self.get_neuron(neurons[0])
             neuron_1 = self.get_neuron(neurons[1])
+
             neuron_0.children.append(neuron_1)
             neuron_1.parents.append(neuron_0)
-        for neuron in self.neurons:
-            if len(neuron.parents) == 0 and neuron.bias == False:
-                self.root_neuron = neuron
-            if neuron.index <= 10:
-                neuron.actv_func = lambda x: x
-            if neuron.index in self.biases:
-                neuron.bias = True
+        for layer in self.neurons.values():
+            for neuron in layer:
+                if neuron.index <= 10:
+                    neuron.actv_func = lambda x: x
+                if neuron.index in self.biases:
+                    neuron.bias = True
 
     def forward_propagate(self, initial_input):
         self.clear_net()
-        input_layer = [neuron for neuron in self.neurons if neuron.index < 11]
-        for idx, neuron in enumerate(input_layer):
+        for idx, neuron in enumerate(self.neurons[1]):
             if neuron.bias:
                 continue
             neuron.input = initial_input[idx]
         self.set_bias_outputs()
 
-        queue = [neuron for neuron in input_layer] #self.get_neuron(i) for i in range(11,11+self.h)
+        queue = [neuron for neuron in self.neurons[1]]
         visited = []
         while queue != []:
             curr_neuron = queue[0]
@@ -83,7 +90,7 @@ class NeuralNet:
         
     def get_net_output(self, initial_input):
         self.forward_propagate(initial_input)
-        return [neuron.output for neuron in self.neurons[-9:]]
+        return [neuron.output for neuron in self.neurons[3]]
 
     def set_bias_outputs(self):
         for neuron_idx in self.biases:
@@ -95,47 +102,79 @@ class NeuralNet:
         for parent in neuron.parents:
             total += self.weights[(parent.index, neuron.index)]*parent.output
 
-        # for weight_nodes in self.weights.keys():
-        #     if weight_nodes[1] == neuron.index:
-        #         parent = self.get_neuron(weight_nodes[0])
-        #         print('neuron', neuron.index, 'parent', neuron.parents, parent.index)
-        #         total += self.weights[weight_nodes]*parent.output
         return total
+    
+    def delete_neuron(self, neuron):
+        new_weights = {}
+        for weight, value in self.weights.items():
+            if neuron.index not in weight:
+                new_weights[weight] = value
+
+        self.weights = new_weights
+        for layer in self.neurons.values():
+            try:
+                layer.remove(neuron)
+            except:
+                continue
+            
+        for existing_neuron in self.neurons[1]+self.neurons[3]:
+            if neuron in existing_neuron.parents:
+                existing_neuron.parents.remove(neuron)
+            if neuron in existing_neuron.children:
+                existing_neuron.children.remove(neuron)
+
+    def add_neuron(self):
+        new_weights = {}
+        
+        max_neuron = self.neurons[1][0]
+        for layer in self.neurons.values():
+            for neuron in layer:
+                if neuron.index > max_neuron.index:
+                    max_neuron = neuron
+        new_neuron = Neuron(max_neuron.index+1, lambda x: 1/(1+math.e**(-x)))
+        self.neurons[2].append(new_neuron)
+
+        for neuron in self.neurons[1]:
+            new_neuron.parents.append(neuron)
+            neuron.children.append(new_neuron)
+            new_weights[(neuron.index, new_neuron.index)] = 0
+        
+        for neuron in self.neurons[3]:
+            neuron.parents.append(new_neuron)
+            new_neuron.children.append(neuron)
+            new_weights[(new_neuron.index, neuron.index)] = 0
+        self.weights.update(new_weights)
+
 
     @classmethod
     def create_net(cls):
         h = random.randint(1,10)
         weights = {}
+        neurons = {1:[], 2:[], 3:[]}
         biases = [10, 11+h]
         current_node_num = 0
         layers = []
         layer_sizes = [10, h+1, 9]
 
         for layer_idx, layer_size in enumerate(layer_sizes):
-            current_layer = []
             for i in range(layer_size):
                 current_node_num += 1
-                current_layer.append(current_node_num) 
-            layers.append(current_layer)
+                neurons[layer_idx+1].append(Neuron(current_node_num, lambda x: 1/(1+math.e**(-x))))
 
-        for layer_idx, layer in enumerate(layers):
-            try:
-                next_layer = layers[layer_idx+1]
-            except:
-                continue
-            links = cls.link_layers(layer, next_layer, biases)
-            for link in links:
-                weights[link] = random.uniform(-0.5,0.5)
+        weight_relations = cls.create_weight_relations(neurons[1], neurons[2], biases)
+        weight_relations += cls.create_weight_relations(neurons[2], neurons[3], biases)
+        for weight in weight_relations:
+            weights[weight] = random.uniform(-0.5,0.5)
 
-        return cls(weights, h)
+        return cls(neurons, weights, h)
     
     @classmethod
-    def link_layers(cls, layer1, layer2, biases):
+    def create_weight_relations(cls, layer1, layer2, biases):
         links = []
         for parent in layer1:
             for child in layer2:
                 if child not in biases:
-                    links.append((parent, child))
+                    links.append((parent.index, child.index))
         return links
 
 
@@ -146,24 +185,42 @@ def create_initial_generation():
     return gen
 
 def create_new_generation(gen):
-    sorted_nets = sorted(gen, key=lambda x: x.score)[:25]
+    sorted_nets = sorted(gen, key=lambda x: x.score, reverse=True)[:25]
     new_gen = sorted_nets.copy()
 
     for parent in sorted_nets:
-        child_weights = {}
-        for pair, weight in parent.weights.items():
-            child_weights[pair] = weight+np.random.normal(0, 0.05)
-        child_h = parent.h
-        # if bool(random.getrandbits(1)):
-        #     if bool(random.getrandbits(1)):
-        #         if child_h != 1:
-        #             child_h -= 1
-        #     else:
-        #         if child_h != 10:
-        #             child_h += 1
+        child = copy.deepcopy(parent)
+
+        for pair, weight in child.weights.items():
+            child.weights[pair] = weight+np.random.normal(0, 0.05)
         
-        child = NeuralNet(child_weights, child_h)
+        for key, weight in child.weights.items():
+            assert parent.weights[key] != weight, 'Weight same as parent'
+            assert abs(parent.weights[key] - weight) <= 0.3, 'Weight varies too much'
+
+        if bool(random.getrandbits(1)):
+            if bool(random.getrandbits(1)):
+                if child.h != 1:
+                    deleted_neuron = None
+                    while deleted_neuron is None:
+                        deleted_neuron = random.choice(child.neurons[2])
+                        if deleted_neuron.bias == True:
+                            deleted_neuron = None
+                    
+                    child.h -= 1
+                    child.delete_neuron(deleted_neuron)
+            else:
+                if child.h != 10:
+                    child.h += 1
+                    child.add_neuron()
+
         new_gen.append(child)
+    
+    for child in new_gen: assert 1 <= child.h <= 10, 'Child has invalid number of neurons'
+
+    h = [child.h for child in new_gen]
+    assert len(set(h)) != 1, 'Consistant h values'
+
     for net in new_gen:
         score_net(net)
     return new_gen
@@ -171,12 +228,14 @@ def create_new_generation(gen):
 def score_net(net, num_games=32):
     score = 0
     for i in range(num_games):
-        game = Game([NeuralNetPlayer(net), RandomPlayer()])
+        game = Game([NeuralNetPlayer(net), NearPerfectPlayer()])
         game.run()
+        
         if game.winner == 1:
-            score +=1
+            score += 1
         elif game.winner == 2:
-            score -= 0
+            score -= 10
+        
     net.score = score
 
 def best_net_score(gen):

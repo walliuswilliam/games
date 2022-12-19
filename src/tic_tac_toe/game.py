@@ -23,8 +23,9 @@ class Game():
 		player = self.players[player_number-1]
 		open_spaces = self.find_open_spaces(self.board)
 		chosen_move = player.choose_space(open_spaces, self.board)
+
 		if chosen_move not in open_spaces:
-			raise Exception('Invalid Move Chosen')
+			raise Exception(f'Player {player_number}: Invalid Move Chosen')
 		self.update_board(chosen_move, player_number)
 
 	def check_winner(self):
@@ -55,10 +56,10 @@ class Game():
 		return self.winner
 
 	def print_board(self):
-		print("\n-------")
+		print("-------")
 		board = [[self.board[i+3*j] for i in range(3)] for j in range(3)]
 		for row in board:
 			for element in row[:-1]:
-				print(element, end="	")
+				print(element, end="  ")
 			print(row[-1])
 		print("-------")

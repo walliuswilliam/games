@@ -20,6 +20,10 @@ class NeuralNetPlayer:
 
     def choose_space(self, possible_moves, board):
         board = self.convert_board(board)
+
+        assert sum(board) == 0, 'Board sum is not 0'
+        for i in set(board): assert i in [-1,0,1], 'Invalid board state'
+        
         net_output = self.net.get_net_output(board)
         net_output_tup = [(i,val) for i, val in enumerate(net_output)]
         available_moves = [i for i in net_output_tup if i[0] in possible_moves]

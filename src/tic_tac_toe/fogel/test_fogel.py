@@ -29,9 +29,10 @@ def evolve_neural_net(num_trials, num_gens, print_iter=False):
             current_gen = create_new_generation(prev_gen)
             trials[trial_num].append(best_net_score(current_gen))
             prev_gen = current_gen
-            if print_iter: print(f'\tGen {_} - {round(time.time() - g_start, 3)} s')
+            if print_iter: print(f'\tGen {_} - {round(time.time() - g_start, 3)}s')
 
-        if print_iter: print(f'Trial {trial_num} Time: {round(time.time() - t_start, 3)} s\n')
+        t = time.time() - t_start
+        if print_iter: print(f'Trial {trial_num} Time: {round(t, 3)}s / {round(t/60, 3)}m \n')
     return trials
 
 
@@ -44,7 +45,7 @@ def calc_average_scores(trials):
     return averages
 
 
-trials = evolve_neural_net(20, 50, print_iter=True)
+trials = evolve_neural_net(20, 150, print_iter=True)
 print(trials)
 print(calc_average_scores(trials))
 

@@ -45,9 +45,9 @@ def calc_average_scores(trials):
     return averages
 
 
-trials = evolve_neural_net(20, 150, print_iter=True)
-print(trials)
-print(calc_average_scores(trials))
+trials = evolve_neural_net(40, 800, print_iter=True)
+# print(trials)
+# print(calc_average_scores(trials))
 
 x_values = [_ for _ in range(len(trials[0]))]
 y_values = list(calc_average_scores(trials))

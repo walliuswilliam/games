@@ -13,8 +13,9 @@ from neural_net_player import *
 from near_perfect_player import *
 
 
-def evolve_neural_net(num_trials, num_gens, print_iter=False):
+def evolve_neural_net(num_trials, num_gens, print_iter=False, return_net=False):
     trials = {i:[] for i in range(num_trials)} #list full of each generation's best score
+    nets = []
 
     for trial_num in range(num_trials):
         t_start = time.time()
@@ -27,12 +28,14 @@ def evolve_neural_net(num_trials, num_gens, print_iter=False):
             g_start = time.time()
         
             current_gen = create_new_generation(prev_gen)
+            nets += current_gen
             trials[trial_num].append(best_net_score(current_gen))
             prev_gen = current_gen
             if print_iter: print(f'\tGen {_} - {round(time.time() - g_start, 3)}s')
 
         t = time.time() - t_start
         if print_iter: print(f'Trial {trial_num} Time: {round(t, 3)}s / {round(t/60, 3)}m \n')
+    if return_net: return sorted(nets, key=lambda x: x.score, reverse=True)[0]
     return trials
 
 
@@ -45,7 +48,11 @@ def calc_average_scores(trials):
     return averages
 
 
-trials = evolve_neural_net(40, 800, print_iter=True)
+# trials = evolve_neural_net(1, 3, print_iter=True)
+best_net = evolve_neural_net(1, 3, print_iter=True, return_net=True)
+print(best_net.score)
+quit()
+
 # print(trials)
 # print(calc_average_scores(trials))
 

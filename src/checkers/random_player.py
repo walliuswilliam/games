@@ -2,7 +2,7 @@ import random
 
 class RandomPlayer:
     def __init__(self):
-        self.color = 1
+        self.player_num = 1
 
     def make_move(self, board):
         valid_moves = board.get_valid_moves(self.color)

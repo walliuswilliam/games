@@ -1,3 +1,5 @@
+import random
+
 class Checkers:
     def __init__(self, players):
         self.players = players
@@ -9,21 +11,28 @@ class Checkers:
         for i, player in enumerate(self.players):
             player.player_num = i+1
 
-
-
-    def get_pieces(self, player_num):
+    def get_moves(self, player_num):
         valid_pieces = []
         for i in range(8):
             for j in range(8):
                 piece = self.board[i][j]
-                if piece == player_num:
-                    if piece > 0:
+                # if piece == player_num:
+                #     if piece > 0:
+
                         
-                         or player_num == 3:
-                        if j < 7 and self.board[i+1][j+1] == 0:
-                            valid_moves.append(((i, j), (i+1, j+1)))
-                        if j > 0 and self.board[i+1][j-1] == 0:
-                            valid_moves.append(((i, j), (i+1, j-1)))
+                #          or player_num == 3:
+                #         if j < 7 and self.board[i+1][j+1] == 0:
+                #             valid_moves.append(((i, j), (i+1, j+1)))
+                #         if j > 0 and self.board[i+1][j-1] == 0:
+                #             valid_moves.append(((i, j), (i+1, j-1)))
+    
+    def check_crowns(self):
+        for idx in range(len(self.board[0])):
+            if self.board[0][idx] == 1:
+                self.board[0][idx] = -1
+        for idx in range(len(self.board[-1])):
+            if self.board[-1][idx] == 2:
+                self.board[-1][idx] = -2
 
     def check_winner(self):
         if {i for row in self.board for i in row} == {0}:
@@ -33,12 +42,16 @@ class Checkers:
         elif not any(2 in row for row in self.board):
             return 1
 
-    def run_turn():
-        for player in players:
-            piece = player.choose_piece(self.get_pieces(player))
-            translation = player.choose_translation(self.get_translations(piece))
+    def run_turn(self, player):
+        possible_moves = self.get_moves(player)
+        move = player.choose_move([row.copy() for row in self.board], possible_moves)
+        if move not in possible_moves:
+            print('Invalid Move')
+            move = random.choice(possible_moves)
+        
+        self.board[move[0][0]][move[0][1]] = 0
+        self.board[move[0][0] + move[1][0]][move[0][1] + move[1][1]] = player.player_num
 
-            if piece
 
 
     

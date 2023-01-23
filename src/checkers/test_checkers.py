@@ -8,8 +8,12 @@ from random_player import *
 players = [RandomPlayer(), RandomPlayer()]
 
 game = Checkers(players)
-game.print_board()
-game.get_moves(1)
+game.run(debug=True)
+print(f'Winner: Player {game.winner}')
+# game.print_board()
+# game.run_turn(game.players[0])
+# game.print_board()
+
 
 # print(game.check_winner())
 

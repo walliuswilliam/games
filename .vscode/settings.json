@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./src/tic_tac_toe/players"
+        "./src/tic_tac_toe/players",
+        "./src/checkers/players"
     ]
 }

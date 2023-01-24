@@ -68,9 +68,21 @@ class Checkers:
         elif not any(2 in row for row in self.board) and not any(-2 in row for row in self.board):
             return 1
 
-    def run_turn(self, player):
+    def run_turn(self, player, piece=None, debug=False):
+        if debug: self.print_board()
         possible_moves = self.get_moves(player.player_num)
-        print(possible_moves)
+        if piece: #NOT REMOVING CORRECTLY
+            for move in possible_moves:
+                if move[0] != piece:
+                    if 2 not in move[1] or -2 not in move[1]:
+                        possible_moves.remove(move)
+            if len(possible_moves) == 0:
+                return
+            else:
+                possible_moves.append((piece, (0,0)))
+            print(possible_moves)
+            quit()
+        
         if len(possible_moves) == 0:
             self.winner = 3-player.player_num
             return
@@ -78,25 +90,31 @@ class Checkers:
         if move not in possible_moves:
             print('Invalid Move')
             move = random.choice(possible_moves)
-        print(f'Move: {move}')
-        self.board[move[0][0]][move[0][1]] = 0
+
+        print('Move:', move)
         new_move = self.apply_translation(move)
-        self.board[new_move[0]][new_move[1]] = player.player_num
-        if 2 or -2 in move[1]:
-            self.board[move[0][0] + move[1][0]//2][move[0][1] + move[1][1]//2] = 0
+        self.board[new_move[0]][new_move[1]] = self.board[move[0][0]][move[0][1]]
+        self.board[move[0][0]][move[0][1]] = 0
         self.check_crowns()
+        if 2 in move[1] or -2 in move[1]:
+            print(new_move)
+            self.board[move[0][0] + move[1][0]//2][move[0][1] + move[1][1]//2] = 0
+            self.run_turn(player, piece=new_move, debug=debug)
+
+        
+
     
     def run(self, num_turns=250, debug=False):
-        if debug: self.print_board()
+        # if debug: self.print_board()
         for i in range(1, 2*num_turns):
             if i % 2 == 0:
                 self.turn += 1 
-            self.run_turn(self.players[(i % 2) - 1])
+            self.run_turn(self.players[(i % 2) - 1], debug=debug)
             if not self.winner:
                 self.winner = self.check_winner()
             if debug:
                 print(f'\nPlayer {self.players[(i % 2)].player_num} turn') 
-                self.print_board()
+                # self.print_board()
 
             if self.winner:
                 return self.winner

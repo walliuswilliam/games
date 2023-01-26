@@ -8,6 +8,7 @@ class Checkers:
         self.winner = None
         self.set_player_nums()
 
+
     def set_player_nums(self):
         for i, player in enumerate(self.players):
             player.player_num = i+1
@@ -65,24 +66,26 @@ class Checkers:
             return 'tie'
         elif not any(1 in row for row in self.board) and not any(-1 in row for row in self.board):
             return 2
+        
         elif not any(2 in row for row in self.board) and not any(-2 in row for row in self.board):
             return 1
 
-    def run_turn(self, player, piece=None, debug=False):
-        if debug: self.print_board()
+    def run_turn(self, player, piece=None, debug=False, symbols=False):
+        if debug: self.print_board(symbols=symbols)
         possible_moves = self.get_moves(player.player_num)
-        if piece: #NOT REMOVING CORRECTLY
+
+        if piece:
+            temp_moves = []
             for move in possible_moves:
-                if move[0] != piece:
-                    if 2 not in move[1] or -2 not in move[1]:
-                        possible_moves.remove(move)
-            if len(possible_moves) == 0:
+                if move[0] == piece:
+                    if 2 in move[1] or -2 in move[1]:
+                        temp_moves.append(move)
+            if len(temp_moves) == 0:
                 return
             else:
-                possible_moves.append((piece, (0,0)))
-            print(possible_moves)
-            quit()
-        
+                temp_moves.append((piece, (0,0)))
+            possible_moves = temp_moves
+            
         if len(possible_moves) == 0:
             self.winner = 3-player.player_num
             return
@@ -90,40 +93,41 @@ class Checkers:
         if move not in possible_moves:
             print('Invalid Move')
             move = random.choice(possible_moves)
+        if move[1] == (0,0):
+            return
 
-        print('Move:', move)
+        if debug: print('Move:', move)
         new_move = self.apply_translation(move)
         self.board[new_move[0]][new_move[1]] = self.board[move[0][0]][move[0][1]]
         self.board[move[0][0]][move[0][1]] = 0
         self.check_crowns()
         if 2 in move[1] or -2 in move[1]:
-            print(new_move)
             self.board[move[0][0] + move[1][0]//2][move[0][1] + move[1][1]//2] = 0
             self.run_turn(player, piece=new_move, debug=debug)
 
-        
-
-    
-    def run(self, num_turns=250, debug=False):
-        # if debug: self.print_board()
+    def run(self, num_turns=250, debug=False, symbols=False):
         for i in range(1, 2*num_turns):
             if i % 2 == 0:
                 self.turn += 1 
-            self.run_turn(self.players[(i % 2) - 1], debug=debug)
+            self.run_turn(self.players[(i % 2) - 1], debug=debug, symbols=symbols)
             if not self.winner:
                 self.winner = self.check_winner()
             if debug:
                 print(f'\nPlayer {self.players[(i % 2)].player_num} turn') 
-                # self.print_board()
-
             if self.winner:
                 return self.winner
     
-    def print_board(self, board=None):
+    def print_board(self, board=None, symbols=False):
         if not board:
             board = self.board
-        print('   ', *range(8), '\n    ―――――――――――――――')
-        for i, row in enumerate(board):
-            print(i, '|', *row, sep=' ')
-    
+        if symbols:
+            print('   ', *range(8), '\n    ―――――――――――――――')
+            for i, row in enumerate(board):
+                symbols = {-1:'♚', 1:'⬤', -2:'♔', 2:'◯', 0:'⬚'}
+                row = [symbols[i] for i in row]
+                print(i, '|', *row, sep=' ')
 
+        else:
+            print('   ', *range(8), '\n    ―――――――――――――――')
+            for i, row in enumerate(board):
+                print(i, '|', *row, sep=' ')

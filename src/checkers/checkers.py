@@ -103,7 +103,7 @@ class Checkers:
         self.check_crowns()
         if 2 in move[1] or -2 in move[1]:
             self.board[move[0][0] + move[1][0]//2][move[0][1] + move[1][1]//2] = 0
-            self.run_turn(player, piece=new_move, debug=debug)
+            self.run_turn(player, piece=new_move, debug=debug, symbols=symbols)
 
     def run(self, num_turns=250, debug=False, symbols=False):
         for i in range(1, 2*num_turns):

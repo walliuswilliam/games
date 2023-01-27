@@ -8,7 +8,7 @@ from input_player import *
 
 
 # players = [RandomPlayer(), RandomPlayer()]
-players = [InputPlayer(), InputPlayer()]
+players = [InputPlayer(), RandomPlayer()]
 
 game = Checkers(players)
 

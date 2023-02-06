@@ -23,7 +23,9 @@ class NeuralNetPlayer:
 
     def convert_board(self, board):
         flattened_board = []
-        for row in board:
+        index = 0
+
+        for row_idx, row in enumerate(board):
             for i in row:
                 if i > 0:
                     if i == self.player_num:
@@ -36,8 +38,13 @@ class NeuralNetPlayer:
                         i = 'k'
                     else:
                         i = '-k'
-            
-                flattened_board.append(i)
+                if row_idx%2 == 0:
+                    if index%2 == 1:
+                        flattened_board.append(i)
+                else:
+                    if index%2 == 0:
+                        flattened_board.append(i)
+                index += 1
         return flattened_board
     
     def update_board(self, index, value, board):

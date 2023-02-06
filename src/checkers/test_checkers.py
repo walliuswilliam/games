@@ -27,7 +27,9 @@ board = [[1, 0, 0, 2, 0, -2, -1, 0],
          [0, 0, 1, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0]]
 
-print(players[0].convert_board(board))
+print(game.board)
+
+print(players[0].convert_board(game.board))
 
 
 

@@ -23,11 +23,10 @@ class Neuron:
             self.output = self.actv_func(self.input)
 
 class NeuralNet:
-    def __init__(self, neurons, weights, h):
+    def __init__(self, neurons, weights):
         self.neurons = neurons # {1:[node_obj, ...], 2:[], 3:[]}
         self.weights = weights
-        self.h = h
-        self.biases = [10, 11+self.h]
+        self.biases = [33, 74, 85]
         
         self.set_node_relations()
         self.score = None
@@ -87,8 +86,9 @@ class NeuralNet:
             queue.pop(0)
         
     def get_net_output(self, initial_input):
-        self.forward_propagate(initial_input)
-        return [neuron.output for neuron in self.neurons[3]]
+        board = self.convert_board(initial_input)
+        self.forward_propagate(board)
+        return self.neurons[4].output
 
     def set_bias_outputs(self):
         for neuron_idx in self.biases:
@@ -99,81 +99,67 @@ class NeuralNet:
         total = 0
         for parent in neuron.parents:
             total += self.weights[(parent.index, neuron.index)]*parent.output
-
         return total
     
-    def delete_neuron(self, neuron):
-        new_weights = {}
-        for weight, value in self.weights.items():
-            if neuron.index not in weight:
-                new_weights[weight] = value
-
-        self.weights = new_weights
-        for layer in self.neurons.values():
-            try:
-                layer.remove(neuron)
-            except:
-                continue
-            
-        for existing_neuron in self.neurons[1]+self.neurons[3]:
-            if neuron in existing_neuron.parents:
-                existing_neuron.parents.remove(neuron)
-            if neuron in existing_neuron.children:
-                existing_neuron.children.remove(neuron)
-
-    def add_neuron(self):
-        new_weights = {}
-        
-        max_neuron = self.neurons[1][0]
-        for layer in self.neurons.values():
-            for neuron in layer:
-                if neuron.index > max_neuron.index:
-                    max_neuron = neuron
-        new_neuron = Neuron(max_neuron.index+1, lambda x: 1/(1+math.e**(-x)))
-        self.neurons[2].append(new_neuron)
-
-        for neuron in self.neurons[1]:
-            new_neuron.parents.append(neuron)
-            neuron.children.append(new_neuron)
-            new_weights[(neuron.index, new_neuron.index)] = 0
-        
-        for neuron in self.neurons[3]:
-            neuron.parents.append(new_neuron)
-            new_neuron.children.append(neuron)
-            new_weights[(new_neuron.index, neuron.index)] = 0
-        self.weights.update(new_weights)
 
 
     @classmethod
     def create_net(cls):
-        h = random.randint(1,10)
         weights = {}
-        neurons = {1:[], 2:[], 3:[]}
-        biases = [10, 11+h]
+        neurons = {1:[], 2:[], 3:[], 4:[]}
+        biases = [33, 74, 85]
+
         current_node_num = 0
-        layers = []
-        layer_sizes = [10, h+1, 9]
+        layer_sizes = [33, 41, 11, 1]
 
         for layer_idx, layer_size in enumerate(layer_sizes):
-            for i in range(layer_size):
+            for _ in range(layer_size):
                 current_node_num += 1
-                neurons[layer_idx+1].append(Neuron(current_node_num, lambda x: 1/(1+math.e**(-x))))
+                neurons[layer_idx+1].append(Neuron(current_node_num, lambda x: math.tanh(x)))
 
-        weight_relations = cls.create_weight_relations(neurons[1], neurons[2], biases)
-        weight_relations += cls.create_weight_relations(neurons[2], neurons[3], biases)
+        weight_relations = []
+        for i,j in zip(range(1, len(neurons)), range(2, len(neurons)+1)):
+            weight_relations += cls.create_weight_relations(neurons[i], neurons[j], biases)
+
         for weight in weight_relations:
-            weights[weight] = random.uniform(-0.5,0.5)
+            weights[weight] = random.uniform(-0.2,0.2)
 
-        return cls(neurons, weights, h)
+        return cls(neurons, weights)
     
     @classmethod
     def create_weight_relations(cls, layer1, layer2, biases):
         links = []
         for parent in layer1:
             for child in layer2:
-                if child not in biases:
+                if child.index not in biases:
                     links.append((parent.index, child.index))
         return links
+    
+    def convert_board(self, board):
+        flattened_board = []
+        index = 0
+
+        for row_idx, row in enumerate(board):
+            for i in row:
+                if i > 0:
+                    if i == self.player_num:
+                        i = 1
+                    else:
+                        i = -1
+
+                elif i < 0:
+                    if abs(i) == self.player_num:
+                        i = 'k'
+                    else:
+                        i = '-k'
+                if row_idx%2 == 0:
+                    if index%2 == 1:
+                        flattened_board.append(i)
+                else:
+                    if index%2 == 0:
+                        flattened_board.append(i)
+                index += 1
+        return flattened_board
 
 
 def create_initial_generation():

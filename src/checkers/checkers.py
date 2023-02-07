@@ -61,6 +61,7 @@ class Checkers:
     def apply_translation(self, move):
         return (move[0][0] + move[1][0], move[0][1] + move[1][1])
 
+    @staticmethod
     def check_winner(self):
         if {i for row in self.board for i in row} == {0}:
             return 'tie'

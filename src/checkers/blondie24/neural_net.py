@@ -23,10 +23,11 @@ class Neuron:
             self.output = self.actv_func(self.input)
 
 class NeuralNet:
-    def __init__(self, neurons, weights):
+    def __init__(self, neurons, weights, player_num):
         self.neurons = neurons # {1:[node_obj, ...], 2:[], 3:[]}
         self.weights = weights
         self.biases = [33, 74, 85]
+        self.player_num = player_num
         
         self.set_node_relations()
         self.score = None
@@ -37,6 +38,9 @@ class NeuralNet:
             for neuron in layer:
                 if neuron.index == neuron_index:
                     return neuron
+
+    def get_flat_neuron_list(self):
+        return [i for j in self.neurons.values() for i in j]
 
     def clear_net(self):
         for layer in self.neurons.values():
@@ -58,13 +62,14 @@ class NeuralNet:
             neuron_1.parents.append(neuron_0)
         for layer in self.neurons.values():
             for neuron in layer:
-                if neuron.index <= 10:
+                if neuron.index <= 32:
                     neuron.actv_func = lambda x: x
                 if neuron.index in self.biases:
                     neuron.bias = True
 
     def forward_propagate(self, initial_input):
         self.clear_net()
+
         for idx, neuron in enumerate(self.neurons[1]):
             if neuron.bias:
                 continue
@@ -75,6 +80,16 @@ class NeuralNet:
         visited = []
         while queue != []:
             curr_neuron = queue[0]
+            if curr_neuron == self.get_flat_neuron_list()[-1]:
+                idx = len(self.get_flat_neuron_list())+1
+                weight = (idx, curr_neuron.index)
+                if weight not in self.weights:
+                    self.weights[weight] = random.uniform(-0.2,0.2)
+                neuron = Neuron(idx, None)
+                neuron.output = sum([i.input for i in self.neurons[1] if i.bias == False])
+                self.neurons[len(self.neurons)-1].append(neuron)
+                curr_neuron.parents.append(neuron)
+
             if curr_neuron.index not in range(11) and curr_neuron.bias == False:
                 curr_neuron.input = self.calc_neuron_input(curr_neuron)
             curr_neuron.update_output()
@@ -88,7 +103,7 @@ class NeuralNet:
     def get_net_output(self, initial_input):
         board = self.convert_board(initial_input)
         self.forward_propagate(board)
-        return self.neurons[4].output
+        return self.neurons[4][0].output
 
     def set_bias_outputs(self):
         for neuron_idx in self.biases:
@@ -104,7 +119,7 @@ class NeuralNet:
 
 
     @classmethod
-    def create_net(cls):
+    def create_net(cls, player_num):
         weights = {}
         neurons = {1:[], 2:[], 3:[], 4:[]}
         biases = [33, 74, 85]
@@ -124,7 +139,7 @@ class NeuralNet:
         for weight in weight_relations:
             weights[weight] = random.uniform(-0.2,0.2)
 
-        return cls(neurons, weights)
+        return cls(neurons, weights, player_num)
     
     @classmethod
     def create_weight_relations(cls, layer1, layer2, biases):

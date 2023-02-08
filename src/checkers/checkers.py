@@ -13,39 +13,41 @@ class Checkers:
         for i, player in enumerate(self.players):
             player.player_num = i+1
 
-    def get_moves(self, player_num):
+    def get_moves(self, player_num, board=None):
+        if board == None:
+            board = self.board
         valid_moves = []
         for i in range(8):
             for j in range(8):
-                piece_num = self.board[i][j]
+                piece_num = board[i][j]
 
                 if abs(piece_num) == player_num:
                     if piece_num == 1 or piece_num < 0:
                             try:
-                                if i>0 and j>0 and self.board[i-1][j-1] == 0:
+                                if i>0 and j>0 and board[i-1][j-1] == 0:
                                     valid_moves.append(((i, j), (-1, -1)))
-                                elif i>0 and j>0 and self.board[i-1][j-1] == 3-player_num and self.board[i-2][j-2] == 0:
+                                elif i>0 and j>0 and board[i-1][j-1] == 3-player_num and board[i-2][j-2] == 0:
                                     valid_moves.append(((i, j), (-2, -2)))
                             except: pass
                             try:
-                                if i>0 and self.board[i-1][j+1] == 0:
+                                if i>0 and board[i-1][j+1] == 0:
                                     valid_moves.append(((i, j), (-1, 1)))
-                                elif i>0 and self.board[i-1][j+1] == 3-player_num and self.board[i-2][j+2] == 0:
+                                elif i>0 and board[i-1][j+1] == 3-player_num and board[i-2][j+2] == 0:
                                     valid_moves.append(((i, j), (-2, 2)))
                             except: pass
                     
                     if piece_num == 2 or piece_num < 0:
                             try:
-                                if self.board[i+1][j+1] == 0:
+                                if board[i+1][j+1] == 0:
                                     valid_moves.append(((i, j), (1, 1)))
-                                elif self.board[i+1][j+1] == 3-player_num and self.board[i+2][j+2] == 0:
+                                elif board[i+1][j+1] == 3-player_num and board[i+2][j+2] == 0:
                                     valid_moves.append(((i, j), (2, 2)))
                                     
                             except: pass
                             try:
-                                if j>0 and self.board[i+1][j-1] == 0:
+                                if j>0 and board[i+1][j-1] == 0:
                                     valid_moves.append(((i, j), (1, -1)))
-                                elif j>0 and self.board[i+1][j-1] == 3-player_num and self.board[i+2][j-2] == 0:
+                                elif j>0 and board[i+1][j-1] == 3-player_num and board[i+2][j-2] == 0:
                                     valid_moves.append(((i, j), (2, -2)))
                             except: pass
         return valid_moves

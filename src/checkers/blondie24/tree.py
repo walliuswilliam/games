@@ -1,12 +1,12 @@
 import sys
 sys.path.append('./src/checkers/')
-from checkers import *
+from checkers.checkers import Checkers
 
 class Node():
-    def __init__(self, state, player):
+    def __init__(self, state, player_num):
         self.state = state
         self.turn = self.set_turn()
-        self.player = player
+        self.player_num = player_num
         self.winner = self.check_winner()
         self.children = []
         self.parent = None
@@ -48,75 +48,35 @@ class Node():
         if diag:
             self.winner = diag
     
-    def get_diags(self, state):
-        fdiag = ['' for _ in range(len(state) + len(state[0]) - 1)]
-        bdiag = ['' for _ in range(len(fdiag))]
-        for x in range(len(state[0])):
-            for y in range(len(state)):
-                fdiag[x + y] += state[y][x]
-                bdiag[x - y - (1 - len(state))] += state[y][x]
-        return fdiag + bdiag
-    
-    def four_in_list(self, lst):
-        for string in lst:
-            for i in range(0, len(string)-3):
-                if string[i] == string[i+1] == string[i+2] == string[i+3] != '0':
-                    return string[i]
-        return False
-    
-    def three_in_list(self, lst):
-        totals = {1:0, 2:0}
-        for string in lst:
-            for i in range(0, len(string)-3):
-                temp_str = string[i:i+4]
-                str_set = set(temp_str)
-
-                if temp_str.count('0') == 1 and len(str_set) == 2:
-                    str_set.remove('0')
-                    totals[int(list(str_set)[0])] += 1
-        return totals
-
-    def two_in_list(self, lst):
-        totals = {1:0, 2:0}
-        for string in lst:
-            for i in range(0, len(string)-3):
-                temp_str = string[i:i+4]
-                str_set = set(temp_str)
-
-                if temp_str.count('0') == 2 and len(str_set) == 2:
-                    str_set.remove('0')
-                    totals[int(list(str_set)[0])] += 1
-        return totals
-    
-    def list_to_string(self, lst):
-        temp_string = ''
-        for s in lst:
-            temp_string += s
-        return temp_string
-
-    def string_to_list(self, s):
-        return [s[i:i+7] for i in range(0, len(s), 7)]
-    
-    def print_state(self, state):
-        for line in state:
-            print(' '.join(line))
 
 
 class Tree():
-    def __init__(self, player):
-        self.root = Node('0'*42, player)
-        self.player = player
+    def __init__(self, player_num):
+        self.root = Node([[(i + j) % 2 * ((3 - ((j < 3) - (j > 4))) % 3) for i in range(8)] for j in range(8)], player_num)
+        self.player_num = player_num
         self.nodes = [self.root]
         self.leaf_nodes = []
         self.states = {self.root.state:self.root}
 
 
     def construct_tree(self, starting_node_state, n):
-        starting_node_state = self.list_to_string(starting_node_state)
         try:
             starting_node = self.states[starting_node_state]
         except:
-            starting_node = Node(starting_node_state, self.player)
+            starting_node = Node(starting_node_state, self.player_num)
+            self.nodes.append(starting_node)
+            self.states[starting_node_state] = starting_node
+        
+        
+        
+        
+        
+        
+        
+        try:
+            starting_node = self.states[starting_node_state]
+        except:
+            starting_node = Node(starting_node_state, self.player_num)
             self.nodes.append(starting_node)
             self.states[starting_node_state] = starting_node
         
@@ -137,7 +97,7 @@ class Tree():
                     if new_state in self.states:
                         new_node = self.states[new_state]
                     else:
-                        new_node = Node(new_state, self.player)
+                        new_node = Node(new_state, self.player_num)
                         self.nodes.append(new_node)
                         self.states[new_state] = new_node
                         queue.append(new_node)
@@ -159,6 +119,7 @@ class Tree():
         self.root.set_score()
     
     def find_open_spaces(self, board):
+        moves = Checkers.find_moves(self.player)
         moves = []
         t_board = [''.join(i) for i in zip(*board)]
         for i, col in enumerate(t_board):
@@ -176,11 +137,19 @@ class Tree():
         board[col_idx] = row[:index] + str(value) + row[index+1:]
         return self.list_to_string(board)
     
-    def list_to_string(self, lst):
-        temp_string = ''
-        for s in lst:
-            temp_string += s
-        return temp_string
+    def state_to_string(state):
+        state_str = ''
+        for sublist in state:
+            for item in sublist:
+                state_str += str(item)
+        return state_str
 
-    def string_to_list(self, s):
-        return [s[i:i+7] for i in range(0, len(s), 7)]
+    def string_to_state(state_str):
+        state = []
+        sublist = []
+        for i, c in enumerate(state_str):
+            sublist.append(int(c))
+            if (i + 1) % 8 == 0:
+                state.append(sublist)
+                sublist = []
+        return state

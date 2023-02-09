@@ -1,13 +1,13 @@
 import sys
-sys.path.append('./src/checkers/')
-from checkers.checkers import Checkers
+sys.path.append('.\src\checkers')
+from checkers import Checkers
 
-class Node():
+class Node:
     def __init__(self, state, player_num):
         self.state = state
         self.turn = self.set_turn()
         self.player_num = player_num
-        self.winner = self.check_winner()
+        self.winner = Checkers.check_winner(self, Tree.string_to_state(self, self.state))
         self.children = []
         self.parent = None
         self.score = None
@@ -50,47 +50,36 @@ class Node():
     
 
 
-class Tree():
+class Tree:
     def __init__(self, player_num):
-        self.root = Node([[(i + j) % 2 * ((3 - ((j < 3) - (j > 4))) % 3) for i in range(8)] for j in range(8)], player_num)
+        root_state = self.state_to_string([[(i + j) % 2 * ((3 - ((j < 3) - (j > 4))) % 3) for i in range(8)] for j in range(8)])
+        self.root = Node(root_state, player_num)
         self.player_num = player_num
         self.nodes = [self.root]
         self.leaf_nodes = []
         self.states = {self.root.state:self.root}
 
 
-    def construct_tree(self, starting_node_state, n):
+    def construct_tree(self, starting_node_state, d):
+        starting_state = self.state_to_string(starting_node_state)
+        print(starting_state)
         try:
-            starting_node = self.states[starting_node_state]
+            starting_node = self.states[starting_state]
         except:
-            starting_node = Node(starting_node_state, self.player_num)
+            starting_node = Node(starting_state, self.player_num)
             self.nodes.append(starting_node)
-            self.states[starting_node_state] = starting_node
-        
-        
-        
-        
-        
-        
-        
-        try:
-            starting_node = self.states[starting_node_state]
-        except:
-            starting_node = Node(starting_node_state, self.player_num)
-            self.nodes.append(starting_node)
-            self.states[starting_node_state] = starting_node
-        
+            self.states[starting_state] = starting_node
+
         self.root = starting_node
 
-        ending_depth = self.calc_game_depth(starting_node.state) + n
         queue = [starting_node]
         while len(queue) != 0:
             current_node = queue[0]
-            if self.calc_game_depth(current_node.state) >= ending_depth:
-                queue.remove(current_node)
-                continue
+            # if self.calc_game_depth(current_node.state) >= ending_depth:
+            #     queue.remove(current_node)
+            #     continue
             if current_node.winner is None:
-                moves = self.find_open_spaces(self.string_to_list(current_node.state))
+                moves = Checkers.get_moves(self, self.player_num, self.string_to_state(current_node.state))
                 for move in moves:
                     state = current_node.state
                     new_state = self.update_board(state, move, current_node.turn)
@@ -108,11 +97,20 @@ class Tree():
                 self.leaf_nodes.append(current_node)
             queue.remove(current_node)
 
-    def calc_game_depth(self, state):
-        total = 0
-        for row in state:
-            total += row.count('0')
-        return 42-total
+
+        node = self.root.children[0]
+        print('node', self.check_node_within_depth(node, 2))
+
+
+    def check_node_within_depth(self, node, d):
+        children = [self.root.children]
+
+        for i in range(d):
+            temp_children = []
+            for child in children:
+                temp_children += child.children
+        return node in children
+
 
     def set_node_scores(self):
         assert len(self.root.children) != 0, "create game tree before setting scores"
@@ -137,14 +135,14 @@ class Tree():
         board[col_idx] = row[:index] + str(value) + row[index+1:]
         return self.list_to_string(board)
     
-    def state_to_string(state):
+    def state_to_string(self, state):
         state_str = ''
         for sublist in state:
             for item in sublist:
                 state_str += str(item)
         return state_str
 
-    def string_to_state(state_str):
+    def string_to_state(self, state_str):
         state = []
         sublist = []
         for i, c in enumerate(state_str):

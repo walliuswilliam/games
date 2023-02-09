@@ -13,8 +13,8 @@ class Checkers:
         for i, player in enumerate(self.players):
             player.player_num = i+1
 
-    def get_moves(self, player_num, board=None):
-        if board == None:
+    def get_moves(self, player_num, board=False):
+        if not board:
             board = self.board
         valid_moves = []
         for i in range(8):
@@ -63,14 +63,15 @@ class Checkers:
     def apply_translation(self, move):
         return (move[0][0] + move[1][0], move[0][1] + move[1][1])
 
-    @staticmethod
-    def check_winner(self):
-        if {i for row in self.board for i in row} == {0}:
+    def check_winner(self, board=False):
+        if not board:
+            board = self.board
+        if {i for row in board for i in row} == {0}:
             return 'tie'
-        elif not any(1 in row for row in self.board) and not any(-1 in row for row in self.board):
+        elif not any(1 in row for row in board) and not any(-1 in row for row in board):
             return 2
         
-        elif not any(2 in row for row in self.board) and not any(-2 in row for row in self.board):
+        elif not any(2 in row for row in board) and not any(-2 in row for row in board):
             return 1
 
     def run_turn(self, player, piece=None, debug=False, symbols=False):

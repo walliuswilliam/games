@@ -75,6 +75,7 @@ class Tree:
         queue = [starting_node]
         while len(queue) != 0:
             current_node = queue[0]
+            
             # if self.calc_game_depth(current_node.state) >= ending_depth:
             #     queue.remove(current_node)
             #     continue

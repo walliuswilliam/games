@@ -13,44 +13,158 @@ class Checkers:
         for i, player in enumerate(self.players):
             player.player_num = i+1
 
-    def get_moves(self, player_num, board=False):
-        if not board:
-            board = self.board
-        valid_moves = []
+
+    def get_moves(self, player_num, board=None):
+        if board == None: board = self.board
+
+        possible_moves = []
+
+        # loop through all coordinates
+        
+
         for i in range(8):
             for j in range(8):
-                piece_num = board[i][j]
 
-                if abs(piece_num) == player_num:
-                    if piece_num == 1 or piece_num < 0:
-                            try:
-                                if i>0 and j>0 and board[i-1][j-1] == 0:
-                                    valid_moves.append(((i, j), (-1, -1)))
-                                elif i>0 and j>0 and board[i-1][j-1] == 3-player_num and board[i-2][j-2] == 0:
-                                    valid_moves.append(((i, j), (-2, -2)))
-                            except: pass
-                            try:
-                                if i>0 and board[i-1][j+1] == 0:
-                                    valid_moves.append(((i, j), (-1, 1)))
-                                elif i>0 and board[i-1][j+1] == 3-player_num and board[i-2][j+2] == 0:
-                                    valid_moves.append(((i, j), (-2, 2)))
-                            except: pass
+                current_coords = [i, j]
+                current_piece = board[i][j]
+
+                # check if there is a piece on the current coord
+
+                if abs(current_piece) == player_num:
+
+                    # get moves that the piece might be able to do
+
+                    moves_to_check = self.add_moves_to_check(current_piece, current_coords, [], [])
+
+                    while len(moves_to_check) > 0:
+
+                        # check first move in moves_to_check
+
+                        move_to_check = moves_to_check.pop(0) # moves_to_check is a queue
+                        coord, translation_to_check, captured_coords = move_to_check
+
+                        new_i, new_j = self.apply_translation((coord, translation_to_check))
+                        if new_i < 0 or new_i > 7 or new_j < 0 or new_j > 7: continue
+                        new_piece = board[new_i][new_j]
+
+                        # check if the new spot is empty
+
+                        if abs(new_piece) == 0 and captured_coords == []:
+                            possible_moves.append(move_to_check)
                     
-                    if piece_num == 2 or piece_num < 0:
-                            try:
-                                if board[i+1][j+1] == 0:
-                                    valid_moves.append(((i, j), (1, 1)))
-                                elif board[i+1][j+1] == 3-player_num and board[i+2][j+2] == 0:
-                                    valid_moves.append(((i, j), (2, 2)))
+                        # check if the opponent is in the new spot
+
+                        elif abs(new_piece) == 3 - player_num:
+                            
+                            # if so, and if the next next spot is empty, add that spot to moves_to_check
+
+                            next_translation = [2*t for t in translation_to_check]
+                            new_new_i, new_new_j = self.apply_translation((coord, next_translation))
+                            if new_new_i < 0 or new_new_i > 7 or new_new_j < 0 or new_new_j > 7: continue
+                            new_new_piece = board[new_new_i][new_new_j]
+
+                            if abs(new_new_piece) == 0 and not self.nested_list_in_list(captured_coords, [new_i, new_j]):
+
+                                # add capture to possible moves
+
+                                previous_translation = self.get_translation(coord, current_coords)
+                                new_translation = self.apply_translation((previous_translation, next_translation))
+                                new_captured_coords = captured_coords + [[new_i, new_j]]
+                                possible_moves.append([current_coords, new_translation, new_captured_coords])
+
+                                # add potential to combo captures
+
+                                next_next_coords = self.apply_translation((current_coords, new_translation))
+                                moves_to_check = self.add_moves_to_check(current_piece, next_next_coords, new_captured_coords, moves_to_check)
+
+                                # then, it'll loop back to the start of moves_to_check
+        
+        return possible_moves
+
+    def add_moves_to_check(self, current_piece, current_coords, captured_coords, moves_to_check):
+        
+        direction = 1 - 2*(current_piece % 2)
+
+        moves_to_check.append([current_coords, [direction, -1], captured_coords])
+        moves_to_check.append([current_coords, [direction, 1], captured_coords])
+
+        if current_piece < 0:
+            moves_to_check.append([current_coords, [-direction, -1], captured_coords])
+            moves_to_check.append([current_coords, [-direction, 1], captured_coords])
+        
+        return moves_to_check
+
+    def lists_are_equal(self, list1, list2):
+        if len(list1) != len(list2): return False
+        for i in range(len(list1)):
+            if list1[i] != list2[i]: return False
+        return True
+
+    def nested_list_in_list(self, parent_list, nested_list):
+        for l in parent_list:
+            if all(x == y for x, y in zip(l, nested_list)):
+                return True
+        return False
+
+    # def get_moves(self, player_num, board=None):
+    #     if not board:
+    #         board = self.board
+    #     valid_moves = []
+    #     for i in range(8):
+    #         for j in range(8):
+    #             piece = board[i][j]
+
+    #             if abs(piece) == player_num:
+
+    #                 if piece == 1 or piece < 0:
+    #                         try:
+    #                             if i>0 and j>0 and board[i-1][j-1] == 0:
+    #                                 valid_moves.append(((i, j), (-1, -1), ()))
+    #                             elif i>0 and j>0 and board[i-1][j-1] == 3-player_num and board[i-2][j-2] == 0:
+    #                                 valid_moves.append(((i, j), (-2, -2), ((i-1, j-1))))
+    #                         except: pass
+    #                         try:
+    #                             if i>0 and board[i-1][j+1] == 0:
+    #                                 valid_moves.append(((i, j), (-1, 1), ()))
+    #                             elif i>0 and board[i-1][j+1] == 3-player_num and board[i-2][j+2] == 0:
+    #                                 valid_moves.append(((i, j), (-2, 2), ((i-1, j+1))))
+    #                         except: pass
+                    
+    #                 if piece == 2 or piece < 0:
+    #                         try:
+    #                             if board[i+1][j+1] == 0:
+    #                                 valid_moves.append(((i, j), (1, 1), ()))
+    #                             elif board[i+1][j+1] == 3-player_num and board[i+2][j+2] == 0:
+    #                                 valid_moves.append(((i, j), (2, 2), ((i+1, j+1))))
                                     
-                            except: pass
-                            try:
-                                if j>0 and board[i+1][j-1] == 0:
-                                    valid_moves.append(((i, j), (1, -1)))
-                                elif j>0 and board[i+1][j-1] == 3-player_num and board[i+2][j-2] == 0:
-                                    valid_moves.append(((i, j), (2, -2)))
-                            except: pass
-        return valid_moves
+    #                         except: pass
+    #                         try:
+    #                             if j>0 and board[i+1][j-1] == 0:
+    #                                 valid_moves.append(((i, j), (1, -1), ()))
+    #                             elif j>0 and board[i+1][j-1] == 3-player_num and board[i+2][j-2] == 0:
+    #                                 valid_moves.append(((i, j), (2, -2), ((i+1, j-1))))
+    #                         except: pass
+    #     for move in valid_moves:
+    #         if 2 in move[1] or 
+    #     return valid_moves
+    
+    # def get_piece_moves(self, piece_coords, board=None):
+    #     if not board:
+    #         board = self.board
+
+    #     piece_direction = 1 - 2*(piece_coords % 2)
+    #     moves = []
+
+
+
+
+    #     moves.append((piece_coords, (piece_direction, -1), ()))
+    #     moves.append((piece_coords, (piece_direction, 1), ()))
+
+    #     if board[piece_coords[0]][piece_coords[1]] < 0:
+    #         moves.append((piece_coords, (-piece_direction, -1), ()))
+    #         moves.append((piece_coords, (-piece_direction, 1), ()))
+
     
     def check_crowns(self):
         for idx in range(len(self.board[0])):
@@ -61,9 +175,12 @@ class Checkers:
                 self.board[-1][idx] = -2
 
     def apply_translation(self, move):
-        return (move[0][0] + move[1][0], move[0][1] + move[1][1])
+        return [move[0][0] + move[1][0], move[0][1] + move[1][1]]
+    
+    def get_translation(self, coord1, coord2):
+        return [coord1[0] - coord2[0], coord1[1] - coord2[1]]
 
-    def check_winner(self, board=False):
+    def check_winner(self, board=None):
         if not board:
             board = self.board
         if {i for row in board for i in row} == {0}:
@@ -74,21 +191,9 @@ class Checkers:
         elif not any(2 in row for row in board) and not any(-2 in row for row in board):
             return 1
 
-    def run_turn(self, player, piece=None, debug=False, symbols=False):
+    def run_turn(self, player, debug=False, symbols=False):
         if debug: self.print_board(symbols=symbols)
         possible_moves = self.get_moves(player.player_num)
-
-        if piece:
-            temp_moves = []
-            for move in possible_moves:
-                if move[0] == piece:
-                    if 2 in move[1] or -2 in move[1]:
-                        temp_moves.append(move)
-            if len(temp_moves) == 0:
-                return
-            else:
-                temp_moves.append((piece, (0,0)))
-            possible_moves = temp_moves
             
         if len(possible_moves) == 0:
             self.winner = 3-player.player_num
@@ -105,21 +210,19 @@ class Checkers:
         self.board[new_move[0]][new_move[1]] = self.board[move[0][0]][move[0][1]]
         self.board[move[0][0]][move[0][1]] = 0
         self.check_crowns()
-        if 2 in move[1] or -2 in move[1]:
-            self.board[move[0][0] + move[1][0]//2][move[0][1] + move[1][1]//2] = 0
-            self.run_turn(player, piece=new_move, debug=debug, symbols=symbols)
 
     def run(self, num_turns=250, debug=False, symbols=False):
         for i in range(1, 2*num_turns):
             if i % 2 == 0:
-                self.turn += 1 
+                self.turn += 1
+            if debug:
+                print(f'\nPlayer {self.players[((i+1) % 2)].player_num} turn') 
             self.run_turn(self.players[(i % 2) - 1], debug=debug, symbols=symbols)
             if not self.winner:
                 self.winner = self.check_winner()
-            if debug:
-                print(f'\nPlayer {self.players[(i % 2)].player_num} turn') 
             if self.winner:
                 return self.winner
+        if debug: print('Game Over: Max Turns Reached')
     
     def print_board(self, board=None, symbols=False):
         if not board:

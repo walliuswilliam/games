@@ -13,7 +13,6 @@ class Checkers:
         for i, player in enumerate(self.players):
             player.player_num = i+1
 
-
     def get_moves(self, player_num, board=None):
         if board == None: board = self.board
 
@@ -105,74 +104,17 @@ class Checkers:
             if all(x == y for x, y in zip(l, nested_list)):
                 return True
         return False
-
-    # def get_moves(self, player_num, board=None):
-    #     if not board:
-    #         board = self.board
-    #     valid_moves = []
-    #     for i in range(8):
-    #         for j in range(8):
-    #             piece = board[i][j]
-
-    #             if abs(piece) == player_num:
-
-    #                 if piece == 1 or piece < 0:
-    #                         try:
-    #                             if i>0 and j>0 and board[i-1][j-1] == 0:
-    #                                 valid_moves.append(((i, j), (-1, -1), ()))
-    #                             elif i>0 and j>0 and board[i-1][j-1] == 3-player_num and board[i-2][j-2] == 0:
-    #                                 valid_moves.append(((i, j), (-2, -2), ((i-1, j-1))))
-    #                         except: pass
-    #                         try:
-    #                             if i>0 and board[i-1][j+1] == 0:
-    #                                 valid_moves.append(((i, j), (-1, 1), ()))
-    #                             elif i>0 and board[i-1][j+1] == 3-player_num and board[i-2][j+2] == 0:
-    #                                 valid_moves.append(((i, j), (-2, 2), ((i-1, j+1))))
-    #                         except: pass
-                    
-    #                 if piece == 2 or piece < 0:
-    #                         try:
-    #                             if board[i+1][j+1] == 0:
-    #                                 valid_moves.append(((i, j), (1, 1), ()))
-    #                             elif board[i+1][j+1] == 3-player_num and board[i+2][j+2] == 0:
-    #                                 valid_moves.append(((i, j), (2, 2), ((i+1, j+1))))
-                                    
-    #                         except: pass
-    #                         try:
-    #                             if j>0 and board[i+1][j-1] == 0:
-    #                                 valid_moves.append(((i, j), (1, -1), ()))
-    #                             elif j>0 and board[i+1][j-1] == 3-player_num and board[i+2][j-2] == 0:
-    #                                 valid_moves.append(((i, j), (2, -2), ((i+1, j-1))))
-    #                         except: pass
-    #     for move in valid_moves:
-    #         if 2 in move[1] or 
-    #     return valid_moves
     
-    # def get_piece_moves(self, piece_coords, board=None):
-    #     if not board:
-    #         board = self.board
-
-    #     piece_direction = 1 - 2*(piece_coords % 2)
-    #     moves = []
-
-
-
-
-    #     moves.append((piece_coords, (piece_direction, -1), ()))
-    #     moves.append((piece_coords, (piece_direction, 1), ()))
-
-    #     if board[piece_coords[0]][piece_coords[1]] < 0:
-    #         moves.append((piece_coords, (-piece_direction, -1), ()))
-    #         moves.append((piece_coords, (-piece_direction, 1), ()))
-
-    
-    def check_crowns(self):
-        for idx in range(len(self.board[0])):
-            if self.board[0][idx] == 1:
-                self.board[0][idx] = -1
-        for idx in range(len(self.board[-1])):
-            if self.board[-1][idx] == 2:
-                self.board[-1][idx] = -2
+    def check_crowns(self, input_board=None):
+        if input_board: board = input_board
+        else: board = self.board
+        for idx in range(len(board[0])):
+            if board[0][idx] == 1:
+                board[0][idx] = -1
+        for idx in range(len(board[-1])):
+            if board[-1][idx] == 2:
+                board[-1][idx] = -2
+        if input_board: return board
 
     def apply_translation(self, move):
         return [move[0][0] + move[1][0], move[0][1] + move[1][1]]
@@ -180,9 +122,14 @@ class Checkers:
     def get_translation(self, coord1, coord2):
         return [coord1[0] - coord2[0], coord1[1] - coord2[1]]
 
+    def remove_piece(self, coords, input_board=None):
+        if input_board: board = input_board
+        else: board = self.board
+        board[coords[0]][coords[1]] = 0
+        if input_board: return board
+
     def check_winner(self, board=None):
-        if not board:
-            board = self.board
+        if not board: board = self.board
         if {i for row in board for i in row} == {0}:
             return 'tie'
         elif not any(1 in row for row in board) and not any(-1 in row for row in board):
@@ -208,7 +155,9 @@ class Checkers:
         if debug: print('Move:', move)
         new_move = self.apply_translation(move)
         self.board[new_move[0]][new_move[1]] = self.board[move[0][0]][move[0][1]]
-        self.board[move[0][0]][move[0][1]] = 0
+        for coord in move[2]:
+            self.remove_piece(coord)
+        self.remove_piece(move[0])
         self.check_crowns()
 
     def run(self, num_turns=250, debug=False, symbols=False):

@@ -24,7 +24,7 @@ class Neuron:
 
 class NeuralNet:
     def __init__(self, neurons, weights, player_num):
-        self.neurons = neurons # {1:[node_obj, ...], 2:[], 3:[]}
+        self.neurons = neurons # {1:[node_obj, ...], ..., 4:[]}
         self.weights = weights
         self.biases = [33, 74, 85]
         self.player_num = player_num
@@ -80,17 +80,28 @@ class NeuralNet:
         visited = []
         while queue != []:
             curr_neuron = queue[0]
-            if curr_neuron == self.get_flat_neuron_list()[-1]:
-                idx = len(self.get_flat_neuron_list())+1
-                weight = (idx, curr_neuron.index)
-                if weight not in self.weights:
-                    self.weights[weight] = random.uniform(-0.2,0.2)
-                neuron = Neuron(idx, None)
-                neuron.output = sum([i.input for i in self.neurons[1] if i.bias == False])
-                self.neurons[len(self.neurons)-1].append(neuron)
-                curr_neuron.parents.append(neuron)
+            # print(curr_neuron.index, [i.index for i in curr_neuron.parents])
 
-            if curr_neuron.index not in range(11) and curr_neuron.bias == False:
+            if curr_neuron == self.get_flat_neuron_list()[-1]:              
+                if len(self.get_flat_neuron_list()) >= 87:
+                    neuron = self.get_neuron(87)
+                    neuron.output = sum([i.input for i in self.neurons[1] if i.bias == False])
+                else:
+                    idx = len(self.get_flat_neuron_list())+1
+                    weight = (idx, curr_neuron.index)
+
+                    if weight not in self.weights:
+                        self.weights[weight] = random.uniform(-0.2,0.2)
+                    neuron = Neuron(idx, lambda x: x)
+                    neuron.output = sum([i.input for i in self.neurons[1] if i.bias == False])
+                    # print()
+
+                    # print(self.get_neuron(87).index)
+                    
+                    self.neurons[len(self.neurons)-1].append(neuron)
+                    curr_neuron.parents.append(neuron)
+
+            if curr_neuron.index not in range(len(self.neurons[1])) and curr_neuron.bias == False and curr_neuron.index != 87:
                 curr_neuron.input = self.calc_neuron_input(curr_neuron)
             curr_neuron.update_output()
 
@@ -112,7 +123,10 @@ class NeuralNet:
     
     def calc_neuron_input(self, neuron):
         total = 0
+        # print(self.weights.keys())
+        # quit()
         for parent in neuron.parents:
+            # print((parent.index, neuron.index), parent.output)
             total += self.weights[(parent.index, neuron.index)]*parent.output
         return total
     
@@ -132,13 +146,19 @@ class NeuralNet:
                 current_node_num += 1
                 neurons[layer_idx+1].append(Neuron(current_node_num, lambda x: math.tanh(x)))
 
+        # print(neurons[4][0].index)
+        # quit()
         weight_relations = []
         for i,j in zip(range(1, len(neurons)), range(2, len(neurons)+1)):
+            # print(i,j)
+            # print(cls.create_weight_relations(neurons[i], neurons[j], biases))
             weight_relations += cls.create_weight_relations(neurons[i], neurons[j], biases)
+
 
         for weight in weight_relations:
             weights[weight] = random.uniform(-0.2,0.2)
-
+        # print(weights)
+        # quit()
         return cls(neurons, weights, player_num)
     
     @classmethod

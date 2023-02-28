@@ -10,7 +10,8 @@ from neural_net import *
 from input_player import *
 from tree import Tree
 
-players = [InputPlayer(), InputPlayer()]
+
+players = [NeuralNetPlayer(), InputPlayer()]
 game = Checkers(players)
 game.run(debug=True)
 

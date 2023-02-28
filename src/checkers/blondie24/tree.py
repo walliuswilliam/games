@@ -5,49 +5,11 @@ from checkers import Checkers
 class Node:
     def __init__(self, state, player_num):
         self.state = state
-        self.turn = self.set_turn()
         self.player_num = player_num
         self.winner = Checkers.check_winner(self, Tree.string_to_state(self, self.state))
         self.children = []
         self.parent = None
         self.score = None
-    
-
-    def set_turn(self):
-        p1_count = 0
-        p2_count = 0
-        for row in self.state:
-            p1_count += row.count('1')
-            p2_count += row.count('2')
-        if p1_count == p2_count:
-            return 1
-        else:
-            return 2
-
-    def get_children_scores(self):
-        if len(self.children) == 0:
-            return
-        for child in self.children:
-            child.set_score()
-        return [child.score for child in self.children]
-
-    def check_winner(self):
-        state = self.string_to_list(self.state)
-        if not any('0' in row for row in state):
-            self.winner = 'tie'
-        
-        rows = self.four_in_list(state)
-        if rows:
-            self.winner = rows
-
-        cols = self.four_in_list([''.join(i) for i in zip(*state)])
-        if cols:
-            self.winner = cols
-
-        diag = self.four_in_list(self.get_diags(state))
-        if diag:
-            self.winner = diag
-    
 
 
 class Tree:
@@ -60,9 +22,8 @@ class Tree:
         self.states = {self.root.state:self.root}
 
 
-    def construct_tree(self, starting_node_state, d):
+    def construct_tree(self, starting_node_state, d=4):
         starting_state = self.state_to_string(starting_node_state)
-        print(starting_state)
         try:
             starting_node = self.states[starting_state]
         except:
@@ -76,14 +37,15 @@ class Tree:
         while len(queue) != 0:
             current_node = queue[0]
             
-            # if self.calc_game_depth(current_node.state) >= ending_depth:
-            #     queue.remove(current_node)
-            #     continue
+            if not self.check_if_node_within_depth(current_node, d) and current_node != self.root:
+                queue.remove(current_node)
+                continue
+
             if current_node.winner is None:
                 moves = Checkers.get_moves(self, self.player_num, self.string_to_state(current_node.state))
                 for move in moves:
                     state = current_node.state
-                    new_state = self.update_board(state, move, current_node.turn)
+                    new_state = self.state_to_string(self.update_board(self.string_to_state(state), move))
                     if new_state in self.states:
                         new_node = self.states[new_state]
                     else:
@@ -98,20 +60,26 @@ class Tree:
                 self.leaf_nodes.append(current_node)
             queue.remove(current_node)
 
+    def update_board(self, board, move):
+        new_coords = Checkers.apply_translation(self, move)
 
-        node = self.root.children[0]
-        print('node', self.check_node_within_depth(node, 2))
+        board[new_coords[0]][new_coords[1]] = board[move[0][0]][move[0][1]]
+        for coord in move[2]:
+            board = Checkers.remove_piece(self, coord, input_board=board)
+        board = Checkers.remove_piece(self, move[0], input_board=board)
+        board = Checkers.check_crowns(self, input_board=board)
+        return board
 
-
-    def check_node_within_depth(self, node, d):
-        children = [self.root.children]
-
+    def check_if_node_within_depth(self, node, d):
+        cur_node = node
+        if cur_node == self.root: return True
         for i in range(d):
-            temp_children = []
-            for child in children:
-                temp_children += child.children
-        return node in children
-
+            if cur_node.parent == self.root:
+                return True
+            else:
+                cur_node = cur_node.parent
+        
+        return False
 
     def set_node_scores(self):
         assert len(self.root.children) != 0, "create game tree before setting scores"
@@ -125,16 +93,6 @@ class Tree:
             if '0' in col:
                 moves.append(i)
         return moves
-
-    def update_board(self, board, index, value):
-        board = self.string_to_list(board)
-        cols = [''.join(i) for i in zip(*board)]
-        chosen_col = [*cols[index]]
-
-        col_idx = len(chosen_col)-1 - list(reversed(chosen_col)).index('0')
-        row = board[col_idx]
-        board[col_idx] = row[:index] + str(value) + row[index+1:]
-        return self.list_to_string(board)
     
     def state_to_string(self, state):
         state_str = ''
@@ -152,3 +110,12 @@ class Tree:
                 state.append(sublist)
                 sublist = []
         return state
+
+    def add_moves_to_check(self, current_piece, current_coords, captured_coords, moves_to_check): return Checkers.add_moves_to_check(self, current_piece, current_coords, captured_coords, moves_to_check)
+    def apply_translation(self, move): return Checkers.apply_translation(self, move)
+    # def lists_are_equal(self, list1, list2): return Checkers.lists_are_equal(self, list1, list2)
+    #      def nested_list_in_list(self, parent_list, nested_list):
+
+
+    
+    # def get_translation(self, coord1, coord2):

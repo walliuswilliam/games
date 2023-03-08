@@ -12,6 +12,7 @@ class NeuralNetPlayer:
 
 
     def choose_move(self, board, possible_moves):
+        print(f'possible moves: {possible_moves}')
         if not self.net: self.net = NeuralNet.create_net(self.player_num)
         if not self.tree: self.tree = Tree(self.player_num)
 
@@ -25,26 +26,28 @@ class NeuralNetPlayer:
             if child.score > max_child.score:
                 max_child = child
         
-        print(max_child)
-        quit()
-        
-        
+        print([i.score for i in board_node.children])
+        print(max_child.score)
+        # print(Checkers.print_board(self, board=Tree.string_to_state(self, max_child.state)))
+        for move in possible_moves:
+            print(move)
+            print('baord', board)
+            temp_board = self.update_board(board, move)
+            print('tb', temp_board)
+            quit()
+            # print(Tree.state_to_string(self, temp_board))
+            print('temp')
+            print(Checkers.print_board(self, board=Tree.string_to_state(self, temp_board)))
+            print(max_child.state)
+            quit()
+            print()
+            if Tree.state_to_string(self, temp_board) == max_child.state:
+                return move
 
-
-        
-        pass
-
-        # board = self.convert_board(board)
-
-        # assert sum(board) == 0, 'Board sum is not 0'
-        # for i in set(board): assert i in [-1,0,1], 'Invalid board state'
-        
-        # net_output = self.net.get_net_output(board)
-        # net_output_tup = [(i,val) for i, val in enumerate(net_output)]
-        # available_moves = [i for i in net_output_tup if i[0] in possible_moves]
-        # return max(available_moves, key=lambda item:item[1])[0]
+        print('Failed to find move')
 
     def set_node_score(self, node):
+        # print(node.state)
         if len(node.children) == 0:
             if node.winner == self.player_num:
                 node.score = 1
@@ -56,7 +59,6 @@ class NeuralNetPlayer:
         
         node.score = max(self.get_children_scores(node))
         
-
     def get_children_scores(self, root_node):
         if len(root_node.children) == 0:
             return
@@ -64,8 +66,12 @@ class NeuralNetPlayer:
             self.set_node_score(child)
         return [child.score for child in root_node.children]
 
+    def update_board(self, board, move):
+        new_coords = Checkers.apply_translation(self, move)
 
-    def update_board(self, index, value, board):
-        board = [i for i in board]
-        board[index] = str(value)
-        return ''.join(board)
+        board[new_coords[0]][new_coords[1]] = board[move[0][0]][move[0][1]]
+        for coord in move[2]:
+            board = Checkers.remove_piece(self, coord, input_board=board)
+        board = Checkers.remove_piece(self, move[0], input_board=board)
+        board = Checkers.check_crowns(self, input_board=board)
+        return board

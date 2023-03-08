@@ -22,7 +22,7 @@ class Tree:
         self.states = {self.root.state:self.root}
 
 
-    def construct_tree(self, starting_node_state, d=4):
+    def construct_tree(self, starting_node_state, d=2):
         starting_state = self.state_to_string(starting_node_state)
         try:
             starting_node = self.states[starting_state]
@@ -113,8 +113,9 @@ class Tree:
 
     def add_moves_to_check(self, current_piece, current_coords, captured_coords, moves_to_check): return Checkers.add_moves_to_check(self, current_piece, current_coords, captured_coords, moves_to_check)
     def apply_translation(self, move): return Checkers.apply_translation(self, move)
+    def get_translation(self, coord1, coord2): return Checkers.get_translation(self, coord1, coord2)
     # def lists_are_equal(self, list1, list2): return Checkers.lists_are_equal(self, list1, list2)
-    #      def nested_list_in_list(self, parent_list, nested_list):
+    def nested_list_in_list(self, parent_list, nested_list): return Checkers.nested_list_in_list(self, parent_list, nested_list)
 
 
     

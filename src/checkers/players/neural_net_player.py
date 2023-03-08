@@ -21,6 +21,9 @@ class NeuralNetPlayer:
         board_node = self.tree.states[Tree.state_to_string(self, board)]
         self.set_node_score(board_node)
 
+        print('node num', len(self.tree.nodes))
+        quit()
+
         max_child = board_node.children[0]
         for child in board_node.children:
             if child.score > max_child.score:

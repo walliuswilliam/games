@@ -11,9 +11,10 @@ from input_player import *
 from tree import Tree
 
 
-players = [NeuralNetPlayer(), InputPlayer()]
+players = [NeuralNetPlayer(), RandomPlayer()]
 game = Checkers(players)
 game.run(debug=True)
+print(players[0].counter)
 
 
 

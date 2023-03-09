@@ -23,11 +23,12 @@ class Neuron:
             self.output = self.actv_func(self.input)
 
 class NeuralNet:
-    def __init__(self, neurons, weights, player_num):
+    def __init__(self, neurons, weights, player_num, k):
         self.neurons = neurons # {1:[node_obj, ...], ..., 4:[]}
         self.weights = weights
         self.biases = [33, 74, 85]
         self.player_num = player_num
+        self.k = k
         
         self.set_node_relations()
         self.score = None
@@ -126,14 +127,19 @@ class NeuralNet:
         # print(self.weights.keys())
         # quit()
         for parent in neuron.parents:
-            # print((parent.index, neuron.index), parent.output)
-            total += self.weights[(parent.index, neuron.index)]*parent.output
+            
+            try:
+                total += self.weights[(parent.index, neuron.index)]*parent.output
+            except:
+                print('weight', self.weights[(parent.index, neuron.index)])
+                print('out', parent.output)
+                quit()
         return total
     
 
 
     @classmethod
-    def create_net(cls, player_num):
+    def create_net(cls, player_num, k):
         weights = {}
         neurons = {1:[], 2:[], 3:[], 4:[]}
         biases = [33, 74, 85]
@@ -159,7 +165,7 @@ class NeuralNet:
             weights[weight] = random.uniform(-0.2,0.2)
         # print(weights)
         # quit()
-        return cls(neurons, weights, player_num)
+        return cls(neurons, weights, player_num, k)
     
     @classmethod
     def create_weight_relations(cls, layer1, layer2, biases):
@@ -184,9 +190,9 @@ class NeuralNet:
 
                 elif i < 0:
                     if abs(i) == self.player_num:
-                        i = 'k'
+                        i = self.k
                     else:
-                        i = '-k'
+                        i = -self.k
                 if row_idx%2 == 0:
                     if index%2 == 1:
                         flattened_board.append(i)

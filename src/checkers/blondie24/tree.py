@@ -98,14 +98,29 @@ class Tree:
         state_str = ''
         for sublist in state:
             for item in sublist:
-                state_str += str(item)
+                if item == -1:
+                    state_str += str(3)
+                elif item == -2:
+                    state_str += str(4)
+                else:
+                    state_str += str(item)
         return state_str
 
     def string_to_state(self, state_str):
         state = []
         sublist = []
         for i, c in enumerate(state_str):
-            sublist.append(int(c))
+            try:
+                if c == '3':
+                    sublist.append(int(-1))
+                elif c == '4':
+                    sublist.append(int(-2))
+                else:
+                    sublist.append(int(c))
+            except:
+                print('state str', state_str)
+                print('c', c)
+                raise Exception()
             if (i + 1) % 8 == 0:
                 state.append(sublist)
                 sublist = []

@@ -45,7 +45,7 @@ class Checkers:
                         new_i, new_j = self.apply_translation((coord, translation_to_check))
                         if new_i < 0 or new_i > 7 or new_j < 0 or new_j > 7: continue
                         new_piece = board[new_i][new_j]
-
+                        
                         # check if the new spot is empty
 
                         if abs(new_piece) == 0 and captured_coords == []:

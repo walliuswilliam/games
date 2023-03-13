@@ -49,7 +49,7 @@ class Tree:
                     if new_state in self.states:
                         new_node = self.states[new_state]
                     else:
-                        new_node = Node(new_state, self.player_num)
+                        new_node = Node(new_state, 3-current_node.player_num)
                         self.nodes.append(new_node)
                         self.states[new_state] = new_node
                         queue.append(new_node)

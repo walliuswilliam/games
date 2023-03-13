@@ -14,7 +14,6 @@ from tree import Tree
 players = [NeuralNetPlayer(), RandomPlayer()]
 game = Checkers(players)
 game.run(debug=True)
-print(players[0].counter)
 
 
 

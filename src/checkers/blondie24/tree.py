@@ -10,6 +10,7 @@ class Node:
         self.children = []
         self.parent = None
         self.score = None
+        self.depth = None
 
 
 class Tree:
@@ -23,6 +24,7 @@ class Tree:
 
 
     def construct_tree(self, starting_node_state, d=2):
+        self.reset_depths()        
         starting_state = self.state_to_string(starting_node_state)
         try:
             starting_node = self.states[starting_state]
@@ -32,6 +34,7 @@ class Tree:
             self.states[starting_state] = starting_node
 
         self.root = starting_node
+        self.root.depth = 0
 
         queue = [starting_node]
         while len(queue) != 0:
@@ -53,12 +56,17 @@ class Tree:
                         self.nodes.append(new_node)
                         self.states[new_state] = new_node
                         queue.append(new_node)
-                        
+                    
                     current_node.children.append(new_node)
                     new_node.parent = current_node
+                    if not new_node.depth:
+                        new_node.depth = current_node.depth + 1
             else:
                 self.leaf_nodes.append(current_node)
             queue.remove(current_node)
+        
+        for idx, node in enumerate(self.nodes):
+            node.idx = idx
 
     def update_board(self, board, move):
         new_coords = Checkers.apply_translation(self, move)
@@ -80,6 +88,10 @@ class Tree:
                 cur_node = cur_node.parent
         
         return False
+    
+    def reset_depths(self):
+        for node in self.nodes:
+            node.depth = None
 
     def set_node_scores(self):
         assert len(self.root.children) != 0, "create game tree before setting scores"

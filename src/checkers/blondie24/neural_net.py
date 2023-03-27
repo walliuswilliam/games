@@ -81,7 +81,6 @@ class NeuralNet:
         visited = []
         while queue != []:
             curr_neuron = queue[0]
-            # print(curr_neuron.index, [i.index for i in curr_neuron.parents])
 
             if curr_neuron == self.get_flat_neuron_list()[-1]:              
                 if len(self.get_flat_neuron_list()) >= 87:
@@ -95,9 +94,6 @@ class NeuralNet:
                         self.weights[weight] = random.uniform(-0.2,0.2)
                     neuron = Neuron(idx, lambda x: x)
                     neuron.output = sum([i.input for i in self.neurons[1] if i.bias == False])
-                    # print()
-
-                    # print(self.get_neuron(87).index)
                     
                     self.neurons[len(self.neurons)-1].append(neuron)
                     curr_neuron.parents.append(neuron)
@@ -124,19 +120,10 @@ class NeuralNet:
     
     def calc_neuron_input(self, neuron):
         total = 0
-        # print(self.weights.keys())
-        # quit()
         for parent in neuron.parents:
-            
-            try:
-                total += self.weights[(parent.index, neuron.index)]*parent.output
-            except:
-                print('weight', self.weights[(parent.index, neuron.index)])
-                print('out', parent.output)
-                quit()
+            total += self.weights[(parent.index, neuron.index)]*parent.output
         return total
     
-
 
     @classmethod
     def create_net(cls, player_num, k):
@@ -152,19 +139,13 @@ class NeuralNet:
                 current_node_num += 1
                 neurons[layer_idx+1].append(Neuron(current_node_num, lambda x: math.tanh(x)))
 
-        # print(neurons[4][0].index)
-        # quit()
         weight_relations = []
         for i,j in zip(range(1, len(neurons)), range(2, len(neurons)+1)):
-            # print(i,j)
-            # print(cls.create_weight_relations(neurons[i], neurons[j], biases))
             weight_relations += cls.create_weight_relations(neurons[i], neurons[j], biases)
-
 
         for weight in weight_relations:
             weights[weight] = random.uniform(-0.2,0.2)
-        # print(weights)
-        # quit()
+
         return cls(neurons, weights, player_num, k)
     
     @classmethod

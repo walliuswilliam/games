@@ -18,10 +18,7 @@ class NeuralNetPlayer:
         self.tree.construct_tree(board)
 
         board_node = self.tree.states[Tree.state_to_string(self, board)]
-        print('setting node scores...')
         self.set_node_scores(board_node)
-        print('done\n')
-        print([child.score for child in board_node.children])
 
         max_child = board_node.children[0]
         for child in board_node.children:
@@ -32,9 +29,6 @@ class NeuralNetPlayer:
             temp_board = self.update_board(board, move)
             if Tree.state_to_string(self, temp_board) == max_child.state:
                 return move
-        
-        print('Failed to find move')
-        quit()
 
     def set_node_scores(self, node):
         stack = [node]

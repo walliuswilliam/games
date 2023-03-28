@@ -160,7 +160,7 @@ class Checkers:
         self.remove_piece(move[0])
         self.check_crowns()
 
-    def run(self, num_turns=250, debug=False, symbols=False):
+    def run(self, num_turns=100, debug=False, symbols=False):
         for i in range(1, 2*num_turns):
             if i % 2 == 0:
                 self.turn += 1

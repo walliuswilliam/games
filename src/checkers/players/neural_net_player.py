@@ -1,25 +1,30 @@
-import sys, copy
+import sys, copy, time
 sys.path.append('./src/checkers/blondie24')
 from neural_net import *
 from tree import *
 
 
 class NeuralNetPlayer:
-    def __init__(self):
+    def __init__(self, net=None):
         self.player_num = None
-        self.net = None
+        self.net = net
         self.tree = None
 
 
     def choose_move(self, board, possible_moves):
         if not self.net: self.net = NeuralNet.create_net(self.player_num, 2)
         if not self.tree: self.tree = Tree(self.player_num)
-
+        
+        s = time.time()
         self.tree.construct_tree(board)
+        print(f'constructed tree from move in: {round(time.time()-s, 4)}s')
 
         board_node = self.tree.states[Tree.state_to_string(self, board)]
+        s = time.time()
         self.set_node_scores(board_node)
+        print(f'scored nodes in: {round(time.time()-s, 4)}s')
 
+        s = time.time()
         max_child = board_node.children[0]
         for child in board_node.children:
             if child.score > max_child.score:
@@ -28,6 +33,7 @@ class NeuralNetPlayer:
         for move in possible_moves:
             temp_board = self.update_board(board, move)
             if Tree.state_to_string(self, temp_board) == max_child.state:
+                print(f'chose move in: {round(time.time()-s, 4)}s')
                 return move
 
     def set_node_scores(self, node):

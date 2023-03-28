@@ -92,19 +92,6 @@ class Tree:
     def reset_depths(self):
         for node in self.nodes:
             node.depth = None
-
-    def set_node_scores(self):
-        assert len(self.root.children) != 0, "create game tree before setting scores"
-        self.root.set_score()
-    
-    def find_open_spaces(self, board):
-        moves = Checkers.find_moves(self.player)
-        moves = []
-        t_board = [''.join(i) for i in zip(*board)]
-        for i, col in enumerate(t_board):
-            if '0' in col:
-                moves.append(i)
-        return moves
     
     def state_to_string(self, state):
         state_str = ''

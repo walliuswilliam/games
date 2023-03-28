@@ -14,6 +14,7 @@ from tree import Tree
 players = [NeuralNetPlayer(), RandomPlayer()]
 game = Checkers(players)
 game.run(debug=True)
+print([i.score for i in players[0].tree.nodes])
 
 
 

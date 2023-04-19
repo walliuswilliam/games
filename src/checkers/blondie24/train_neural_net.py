@@ -70,6 +70,7 @@ def score_net(net, opp_nets):
     score = 0
     count = 0
     for opp in opp_nets:
+        s = time.time()
         count+=1
         opp.player_num = 2
         game = Checkers([NeuralNetPlayer(net), NeuralNetPlayer(opp)])
@@ -80,7 +81,7 @@ def score_net(net, opp_nets):
         elif game.winner == 2:
             score -= 2
         opp.player_num = 1
-        print(f'done with game {count}')
+        print(f'done with game {count} - {round(time.time()-s, 4)} s')
     net.score = score
 
 def best_net_score(gen):

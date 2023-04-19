@@ -15,16 +15,16 @@ class NeuralNetPlayer:
         if not self.net: self.net = NeuralNet.create_net(self.player_num, 2)
         if not self.tree: self.tree = Tree(self.player_num)
         
-        s = time.time()
+        # s = time.time()
         self.tree.construct_tree(board)
-        print(f'constructed tree from move in: {round(time.time()-s, 4)}s')
+        # print(f'constructed tree from move in: {round(time.time()-s, 4)}s')
 
         board_node = self.tree.states[Tree.state_to_string(self, board)]
-        s = time.time()
+        # s = time.time()
         self.set_node_scores(board_node)
-        print(f'scored nodes in: {round(time.time()-s, 4)}s')
+        # print(f'scored nodes in: {round(time.time()-s, 4)}s')
 
-        s = time.time()
+        # s = time.time()
         max_child = board_node.children[0]
         for child in board_node.children:
             if child.score > max_child.score:
@@ -33,25 +33,16 @@ class NeuralNetPlayer:
         for move in possible_moves:
             temp_board = self.update_board(board, move)
             if Tree.state_to_string(self, temp_board) == max_child.state:
-                print(f'chose move in: {round(time.time()-s, 4)}s')
+                # print(f'chose move in: {time.time()-s}s')
                 return move
 
     def set_node_scores(self, node):
         stack = [node]
         visited_states = {node.state:node}
 
-        num_repeats = 0
-        prev_state = None
-
         while len(stack) != 0:
             current_node = stack[0]
             visited_states[current_node.state] = current_node
-
-            if current_node.state == prev_state:
-                num_repeats += 1
-            else:
-                prev_state = current_node.state
-                num_repeats = 0
 
             # Node can be scored directly
             if len(current_node.children) == 0:
@@ -60,7 +51,9 @@ class NeuralNetPlayer:
                 elif current_node.winner == 3 - self.player_num:
                     current_node.score = -1
                 else:
+                    # s = time.time()
                     current_node.score = self.net.get_net_output(Tree.string_to_state(self, node.state))
+                    # print(f'net score time: {round(time.time()-s, 4)}')
                 stack.pop(0)
                 continue
             

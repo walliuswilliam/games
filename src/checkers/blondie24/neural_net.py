@@ -80,10 +80,12 @@ class NeuralNet:
 
         queue = [neuron for neuron in self.neurons[1]]
         visited = []
+
+        end_neuron = self.get_flat_neuron_list()[-1]
         while queue != []:
             curr_neuron = queue[0]
 
-            if curr_neuron == self.get_flat_neuron_list()[-1]:              
+            if curr_neuron == end_neuron: #self.get_flat_neuron_list()[-1]:              
                 if len(self.get_flat_neuron_list()) >= 87:
                     neuron = self.get_neuron(87)
                     neuron.output = sum([i.input for i in self.neurons[1] if i.bias == False])

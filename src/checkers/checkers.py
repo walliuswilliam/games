@@ -170,7 +170,6 @@ class Checkers:
             if not self.winner:
                 self.winner = self.check_winner()
             if self.winner:
-                print(i)
                 return self.winner
         if debug: print('Game Over: Max Turns Reached')
     

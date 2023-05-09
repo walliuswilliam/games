@@ -23,16 +23,16 @@ for key in nn2.weights:
     nn2.weights[key] = 0.1
 
 
-nn1.get_net_output([[1, 0, 0, 2, 0, -2, -1, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, -2],
-         [0, 0, 0, 0, 2, 0, 0, 0],
-         [0, 0, 0, 0, 0, -1, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 1, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0]])
-print(f'Time: {time.time()-s} s')
-quit()
+# nn1.get_net_output([[1, 0, 0, 2, 0, -2, -1, 0],
+#          [0, 0, 0, 0, 0, 0, 0, 0],
+#          [0, 0, 0, 0, 0, 0, 0, -2],
+#          [0, 0, 0, 0, 2, 0, 0, 0],
+#          [0, 0, 0, 0, 0, -1, 0, 0],
+#          [0, 0, 0, 0, 0, 0, 0, 0],
+#          [0, 0, 1, 0, 0, 0, 0, 0],
+#          [0, 0, 0, 0, 0, 0, 0, 0]])
+# print(f'Time: {time.time()-s} s')
+# quit()
 game = Checkers([NeuralNetPlayer(nn1), NeuralNetPlayer(nn2)])
 # game = Checkers([RandomPlayer(), RandomPlayer()])
 game.run()

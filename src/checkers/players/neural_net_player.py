@@ -15,14 +15,14 @@ class NeuralNetPlayer:
         if not self.net: self.net = NeuralNet.create_net(self.player_num, 2)
         if not self.tree: self.tree = Tree(self.player_num)
         
-        # s = time.time()
+        s = time.time()
         self.tree.construct_tree(board)
-        # print(f'constructed tree from move in: {round(time.time()-s, 4)}s')
+        print(f'constructed tree from move in: {round(time.time()-s, 4)}s')
 
         board_node = self.tree.states[Tree.state_to_string(self, board)]
-        # s = time.time()
+        s = time.time()
         self.set_node_scores(board_node)
-        # print(f'scored nodes in: {round(time.time()-s, 4)}s')
+        print(f'scored nodes in: {round(time.time()-s, 4)}s')
 
         # s = time.time()
         max_child = board_node.children[0]
@@ -51,9 +51,9 @@ class NeuralNetPlayer:
                 elif current_node.winner == 3 - self.player_num:
                     current_node.score = -1
                 else:
-                    # s = time.time()
+                    s = time.time()
                     current_node.score = self.net.get_net_output(Tree.string_to_state(self, node.state))
-                    # print(f'net score time: {round(time.time()-s, 4)}')
+                    print(f'net score time: {round(time.time()-s, 4)}')
                 stack.pop(0)
                 continue
             

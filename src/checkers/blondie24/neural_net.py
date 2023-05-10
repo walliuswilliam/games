@@ -25,7 +25,7 @@ class Neuron:
 class NeuralNet:
     def __init__(self, neurons, weights, player_num, k):
         self.neurons = neurons # {1:[node_obj, ...], ..., 4:[]}
-        self.weights = weights
+        self.weights = weights # {(parent_idx, child_idx): weight, ...}
         self.biases = [33, 74, 85]
         self.player_num = player_num
         self.k = k
@@ -52,10 +52,6 @@ class NeuralNet:
                     neuron.output = None
 
     def set_node_relations(self):
-        for layer in self.neurons.values():
-            for neuron in layer:
-                neuron.parents = []
-                neuron.children = []
         for neurons in self.weights.keys():
             neuron_0 = self.get_neuron(neurons[0])
             neuron_1 = self.get_neuron(neurons[1])
@@ -82,7 +78,7 @@ class NeuralNet:
         visited = []
 
         end_neuron = self.get_flat_neuron_list()[-1]
-        while queue != []:
+        while len(queue) != 0:
             curr_neuron = queue[0]
 
             if curr_neuron == end_neuron: #self.get_flat_neuron_list()[-1]:              
